@@ -1,0 +1,58 @@
+version: '3.9'
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: ./deploy/Dockerfile
+      target: prod
+    image: content_discovery:${CONTENT_DISCOVERY_VERSION:-latest}
+    restart: always
+    env_file:
+    - .env
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      CONTENT_DISCOVERY_HOST: 0.0.0.0
+      CONTENT_DISCOVERY_DB_HOST: content_discovery-db
+      CONTENT_DISCOVERY_DB_PORT: 5432
+      CONTENT_DISCOVERY_DB_USER: content_discovery
+      CONTENT_DISCOVERY_DB_PASS: content_discovery
+      CONTENT_DISCOVERY_DB_BASE: content_discovery
+
+  db:
+    image: postgres:13.8-bullseye
+    hostname: content_discovery-db
+    environment:
+      POSTGRES_PASSWORD: "content_discovery"
+      POSTGRES_USER: "content_discovery"
+      POSTGRES_DB: "content_discovery"
+    volumes:
+    - content_discovery-db-data:/var/lib/postgresql/data
+    restart: always
+    healthcheck:
+      test: pg_isready -U content_discovery
+      interval: 2s
+      timeout: 3s
+      retries: 40
+
+  migrator:
+    image: content_discovery:${CONTENT_DISCOVERY_VERSION:-latest}
+    restart: "no"
+    command: alembic upgrade head
+    environment:
+      CONTENT_DISCOVERY_DB_HOST: content_discovery-db
+      CONTENT_DISCOVERY_DB_PORT: 5432
+      CONTENT_DISCOVERY_DB_USER: content_discovery
+      CONTENT_DISCOVERY_DB_PASS: content_discovery
+      CONTENT_DISCOVERY_DB_BASE: content_discovery
+    depends_on:
+      db:
+        condition: service_healthy
+
+
+
+volumes:
+  content_discovery-db-data:
+    name: content_discovery-db-data
