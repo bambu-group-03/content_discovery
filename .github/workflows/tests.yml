@@ -77,3 +77,16 @@ jobs:
       env:
         CONTENT_DISCOVERY_HOST: "0.0.0.0"
         CONTENT_DISCOVERY_DB_HOST: localhost
+  devflow:
+    runs-on: ubuntu-latest
+    steps:
+    - name: checkout
+      uses: actions/checkout@master
+    - uses: okteto/context@latest
+      with:
+        token: ${{ secrets.OKTETO_TOKEN }}
+    - name: "Create deployment"
+      uses: luiscusihuaman/okteto-deploy@main
+      with:
+        file: okteto.yml
+        build: "true"
