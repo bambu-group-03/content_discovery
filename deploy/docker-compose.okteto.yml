@@ -18,7 +18,7 @@ services:
     - "5000:5000"
     environment:
       CONTENT_DISCOVERY_HOST: 0.0.0.0
-      CONTENT_DISCOVERY_DB_HOST: content_discovery-db
+      CONTENT_DISCOVERY_DB_HOST: db
       CONTENT_DISCOVERY_DB_PORT: 5432
       CONTENT_DISCOVERY_DB_USER: content_discovery
       CONTENT_DISCOVERY_DB_PASS: content_discovery
@@ -26,7 +26,6 @@ services:
 
   db:
     image: postgres:13.8-bullseye
-    hostname: content_discovery-db
     environment:
       POSTGRES_PASSWORD: "content_discovery"
       POSTGRES_USER: "content_discovery"

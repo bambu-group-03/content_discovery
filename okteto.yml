@@ -15,3 +15,4 @@ deploy:
     - path: /
       service: api
       port: 5000
+namespace: content-discovery-luiscusihuaman
