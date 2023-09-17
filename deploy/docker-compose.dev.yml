@@ -13,3 +13,7 @@ services:
     environment:
       # Enables autoreload.
       CONTENT_DISCOVERY_RELOAD: "True"
+  db:
+    ports:
+      # Exposes database port.
+    - "5432:5432"

@@ -1,0 +1,17 @@
+name: content_discovery
+
+# The build section defines how to build the images of your development environment
+# More info: https://www.okteto.com/docs/reference/manifest/#build
+build:
+  api:
+    context: .
+    dockerfile: deploy/Dockerfile
+deploy:
+  commands:
+    - cp .env_template .env
+  compose:
+    - file: deploy/docker-compose.okteto.yml
+  endpoints:
+    - path: /
+      service: api
+      port: 5000
