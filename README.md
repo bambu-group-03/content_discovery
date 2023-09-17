@@ -25,14 +25,14 @@ You can read more about poetry here: https://python-poetry.org/
 You can start the project with docker using this command:
 
 ```bash
-docker-compose -f deploy/docker-compose.yml --project-directory . up --build
+docker compose-f deploy/docker-compose.yml --project-directory . up --build
 ```
 
 If you want to develop in docker with autoreload add `-f deploy/docker-compose.dev.yml` to your docker command.
 Like this:
 
 ```bash
-docker-compose -f deploy/docker-compose.yml -f deploy/docker-compose.dev.yml --project-directory . up --build
+docker compose-f deploy/docker-compose.yml -f deploy/docker-compose.dev.yml --project-directory . up --build
 ```
 
 This command exposes the web application on port 5000, mounts current directory and enables autoreload.
@@ -40,7 +40,7 @@ This command exposes the web application on port 5000, mounts current directory 
 But you have to rebuild image every time you modify `poetry.lock` or `pyproject.toml` with this command:
 
 ```bash
-docker-compose -f deploy/docker-compose.yml --project-directory . build
+docker compose-f deploy/docker-compose.yml --project-directory . build
 ```
 
 ## Project structure
@@ -68,8 +68,11 @@ content_discovery
 
 This application can be configured with environment variables.
 
-You can create `.env` file in the root directory and place all
-environment variables here.
+This application can be configured with environment variables.
+
+```bash
+cp .env_template .env
+```
 
 All environment variables should start with "CONTENT_DISCOVERY_" prefix.
 
@@ -81,7 +84,7 @@ in `content_discovery.settings.Settings.Config`.
 An example of .env file:
 ```bash
 CONTENT_DISCOVERY_RELOAD="True"
-CONTENT_DISCOVERY_PORT="8000"
+CONTENT_DISCOVERY_PORT="5000"
 CONTENT_DISCOVERY_ENVIRONMENT="dev"
 ```
 
@@ -118,7 +121,7 @@ It will create needed components.
 If you haven't pushed to docker registry yet, you can build image locally.
 
 ```bash
-docker-compose -f deploy/docker-compose.yml --project-directory . build
+docker compose-f deploy/docker-compose.yml --project-directory . build
 docker save --output content_discovery.tar content_discovery:latest
 ```
 
@@ -161,8 +164,8 @@ alembic revision
 If you want to run it in docker, simply run:
 
 ```bash
-docker-compose -f deploy/docker-compose.yml -f deploy/docker-compose.dev.yml --project-directory . run --build --rm api pytest -vv .
-docker-compose -f deploy/docker-compose.yml -f deploy/docker-compose.dev.yml --project-directory . down
+docker compose-f deploy/docker-compose.yml -f deploy/docker-compose.dev.yml --project-directory . run --build --rm api pytest -vv .
+docker compose-f deploy/docker-compose.yml -f deploy/docker-compose.dev.yml --project-directory . down
 ```
 
 For running tests on your local machine.
