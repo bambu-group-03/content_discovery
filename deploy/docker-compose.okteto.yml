@@ -15,7 +15,7 @@ services:
         condition: service_healthy
     ports:
       # Exposes application port.
-    - "5000:5000"
+    - "9000:9000"
     environment:
       CONTENT_DISCOVERY_HOST: 0.0.0.0
       CONTENT_DISCOVERY_DB_HOST: db

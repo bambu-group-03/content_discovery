@@ -35,7 +35,7 @@ Like this:
 docker compose-f deploy/docker-compose.yml -f deploy/docker-compose.dev.yml --project-directory . up --build
 ```
 
-This command exposes the web application on port 5000, mounts current directory and enables autoreload.
+This command exposes the web application on port 9000, mounts current directory and enables autoreload.
 
 But you have to rebuild image every time you modify `poetry.lock` or `pyproject.toml` with this command:
 
@@ -84,7 +84,7 @@ in `content_discovery.settings.Settings.Config`.
 An example of .env file:
 ```bash
 CONTENT_DISCOVERY_RELOAD="True"
-CONTENT_DISCOVERY_PORT="5000"
+CONTENT_DISCOVERY_PORT="9000"
 CONTENT_DISCOVERY_ENVIRONMENT="dev"
 ```
 

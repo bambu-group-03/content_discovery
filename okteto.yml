@@ -14,5 +14,5 @@ deploy:
   endpoints:
     - path: /
       service: api
-      port: 5000
+      port: 9000
 namespace: content-discovery-luiscusihuaman
