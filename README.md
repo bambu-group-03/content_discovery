@@ -35,7 +35,7 @@ Like this:
 docker-compose -f deploy/docker-compose.yml -f deploy/docker-compose.dev.yml --project-directory . up --build
 ```
 
-This command exposes the web application on port 8000, mounts current directory and enables autoreload.
+This command exposes the web application on port 5000, mounts current directory and enables autoreload.
 
 But you have to rebuild image every time you modify `poetry.lock` or `pyproject.toml` with this command:
 

@@ -35,7 +35,7 @@ spec:
             memory: "200Mi"
             cpu: "100m"
         ports:
-        - containerPort: 8000
+        - containerPort: 5000
           name: api-port
 ---
 apiVersion: v1
