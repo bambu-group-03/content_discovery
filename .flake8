@@ -72,6 +72,12 @@ ignore =
   WPS473,
   ; too many no-cover comments.
   WPS403,
+  ; Found wrong function call: print
+  WPS421,
+  ; Missing "Returns" in Docstring: - return
+  DAR201,
+  ; Missing parameter(s) in Docstring
+  DAR101
 
 per-file-ignores =
   ; all tests
