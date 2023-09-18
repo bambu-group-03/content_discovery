@@ -66,6 +66,7 @@ class Settings(BaseSettings):
             password=self.db_pass,
             path=f"/{self.db_base}",
         )
+
     identity_socializer_url: str = "http://localhost:9876"
     model_config = SettingsConfigDict(
         env_file=".env",

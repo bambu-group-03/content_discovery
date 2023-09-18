@@ -8,9 +8,9 @@ build:
     dockerfile: deploy/Dockerfile
 deploy:
   compose:
-    - file: deploy/docker-compose.okteto.yml
+  - file: deploy/docker-compose.okteto.yml
   endpoints:
-    - path: /
-      service: api
-      port: 9000
+  - path: /
+    service: api
+    port: 9000
 namespace: content-discovery-luiscusihuaman
