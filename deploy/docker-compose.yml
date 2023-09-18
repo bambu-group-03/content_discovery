@@ -10,6 +10,8 @@ services:
     restart: always
     env_file:
     - .env
+    networks:
+      - microservices
     depends_on:
       db:
         condition: service_healthy
@@ -56,3 +58,7 @@ services:
 volumes:
   content_discovery-db-data:
     name: content_discovery-db-data
+
+networks:
+  microservices:
+    external: true
