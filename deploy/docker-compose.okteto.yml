@@ -9,7 +9,7 @@ services:
     image: content_discovery:${CONTENT_DISCOVERY_VERSION:-latest}
     restart: always
     env_file:
-    - .env
+    - ../.env.remote
     depends_on:
       db:
         condition: service_healthy

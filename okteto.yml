@@ -7,8 +7,6 @@ build:
     context: .
     dockerfile: deploy/Dockerfile
 deploy:
-  commands:
-    - cp .env_template .env
   compose:
     - file: deploy/docker-compose.okteto.yml
   endpoints:
