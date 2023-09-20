@@ -33,6 +33,8 @@ services:
     volumes:
     - content_discovery-db-data:/var/lib/postgresql/data
     restart: always
+    networks:
+    - microservices
     healthcheck:
       test: pg_isready -U content_discovery
       interval: 2s
@@ -43,6 +45,8 @@ services:
     image: content_discovery:${CONTENT_DISCOVERY_VERSION:-latest}
     restart: "no"
     command: alembic upgrade head
+    networks:
+    - microservices
     environment:
       CONTENT_DISCOVERY_DB_HOST: content_discovery-db
       CONTENT_DISCOVERY_DB_PORT: 5432
