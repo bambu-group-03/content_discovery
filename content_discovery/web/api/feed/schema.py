@@ -1,13 +1,17 @@
-from pydantic import BaseModel, ConfigDict
-
+from pydantic import BaseModel
+from typing import List, Optional
 
 class Tweet(BaseModel):
     """
-    DTO for dummy models.
-
-    It returned when accessing dummy models from the API.
+    Tweet
     """
+    id: int
     author: str
     content: str
 
 
+class FeedPack(BaseModel):
+    """
+    Collection of tweets
+    """
+    tweets: Optional[List[int]]
