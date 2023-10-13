@@ -1,5 +1,5 @@
 from typing import List
-
+from sqlalchemy import inspect
 from fastapi import APIRouter, HTTPException
 from fastapi.param_functions import Depends
 
@@ -16,8 +16,10 @@ async def post_tweet(
     """
     uploads a tweet with the received content
     """
-    await snaps_dao.create_snaps_model(_content=incoming_message.content)
-    return Tweet(id=42, author="Ada Lovelace", content=incoming_message.content)
+    snap = await snaps_dao.create_snaps_model(_content=incoming_message.content)
+    insp = inspect(snap)
+    _id = insp.attrs.id.value
+    return Tweet(id=(int(_id) if _id else 69420), author=str(insp.attrs.user_id.value), content=insp.attrs.content.value)
     
 @router.get("/tweet/{tweet_id}")
 async def get_tweet(tweet_id: int, snaps_dao: SnapDAO = Depends()) -> None:
