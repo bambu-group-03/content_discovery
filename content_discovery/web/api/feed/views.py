@@ -24,7 +24,7 @@ async def post_tweet(
 @router.get("/tweet/{tweet_id}")
 async def get_tweet(tweet_id: int, snaps_dao: SnapDAO = Depends()) -> None:
     """
-    If the tweet id is 42, gets a tweet.
+    Gets a tweet
     """
     tweet = await snaps_dao.filter(tweet_id)
     if(tweet):
