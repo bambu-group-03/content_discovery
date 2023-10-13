@@ -39,8 +39,8 @@ class SnapDAO:
 
     async def filter(
         self,
-        content: Optional[str] = None,
-    ) -> List[SnapsModel]:
+        id: int,
+    ) -> SnapsModel:
         """
         Get specific snap model.
 
@@ -48,7 +48,6 @@ class SnapDAO:
         :return: snap models.
         """
         query = select(SnapsModel)
-        if content:
-            query = query.where(SnapsModel.content == content)
+        query = query.where(SnapsModel.id == id)
         rows = await self.session.execute(query)
-        return list(rows.scalars().fetchall())
+        return rows.scalars().first()

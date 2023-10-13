@@ -20,12 +20,13 @@ async def post_tweet(
     return Tweet(id=42, author="Ada Lovelace", content=incoming_message.content)
     
 @router.get("/tweet/{tweet_id}")
-def get_tweet(tweet_id: int) -> None:
+async def get_tweet(tweet_id: int, snaps_dao: SnapDAO = Depends()) -> None:
     """
     If the tweet id is 42, gets a tweet.
     """
-    if(tweet_id == 42):
-        return Tweet(id=42, author="Ada Lovelace", content="Hello! This is a tweet")
+    tweet = await snaps_dao.filter(tweet_id)
+    if(tweet):
+        return Tweet(id=tweet.id, author=str(tweet.user_id), content=tweet.content)
     else:
         raise HTTPException(status_code=405, detail="That tweet doesnt exist")
 
