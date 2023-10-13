@@ -29,8 +29,12 @@ def get_tweet(tweet_id: int) -> None:
         raise HTTPException(status_code=405, detail="That tweet doesnt exist")
 
 @router.get("/")
-def get_tweets() -> None:
+async def get_tweets(snaps_dao: SnapDAO = Depends()) -> None:
     """
     Returns a list of tweet ids
     """
-    return FeedPack(tweets=[42])
+    ids = []
+    snaps = await snaps_dao.get_all_snaps(100,0)
+    for snap in snaps:
+        ids.append(snap.id)
+    return FeedPack(tweets=ids)
