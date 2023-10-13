@@ -14,7 +14,7 @@ class FeedPack(BaseModel):
     """
     Collection of tweets
     """
-    tweets: Optional[List[int]]
+    tweets: Optional[List[Tweet]]
 
 class PostSnap(BaseModel):
     """

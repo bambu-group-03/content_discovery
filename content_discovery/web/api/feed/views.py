@@ -1,3 +1,4 @@
+from typing import List
 
 from fastapi import APIRouter, HTTPException
 from fastapi.param_functions import Depends
@@ -29,12 +30,12 @@ def get_tweet(tweet_id: int) -> None:
         raise HTTPException(status_code=405, detail="That tweet doesnt exist")
 
 @router.get("/")
-async def get_tweets(snaps_dao: SnapDAO = Depends()) -> None:
+async def get_tweets(snaps_dao: SnapDAO = Depends()) -> FeedPack:
     """
     Returns a list of tweet ids
     """
-    ids = []
+    _tweets = []
     snaps = await snaps_dao.get_all_snaps(100,0)
     for snap in snaps:
-        ids.append(snap.id)
-    return FeedPack(tweets=ids)
+        _tweets.append(Tweet(id=snap.id, author=str(snap.user_id), content=snap.content))
+    return FeedPack(tweets=_tweets)
