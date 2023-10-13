@@ -1,16 +1,22 @@
+
 from fastapi import APIRouter, HTTPException
+from fastapi.param_functions import Depends
+
 from content_discovery.web.api.feed.schema import Tweet, FeedPack, PostSnap
+from content_discovery.db.dao.snaps_dao import SnapDAO
 
 router = APIRouter()
 
 
 @router.post("/post")
-def post_tweet(incoming_message: PostSnap) -> Tweet:
+async def post_tweet(
+    incoming_message: PostSnap, 
+    snaps_dao: SnapDAO = Depends()) -> Tweet:
     """
     uploads a tweet with the received content
     """
-    _content = incoming_message.content
-    return Tweet(id=42, author="Ada Lovelace", content=_content)
+    await snaps_dao.create_snaps_model(_content=incoming_message.content)
+    return Tweet(id=42, author="Ada Lovelace", content=incoming_message.content)
     
 @router.get("/tweet/{tweet_id}")
 def get_tweet(tweet_id: int) -> None:
