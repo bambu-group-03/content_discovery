@@ -19,7 +19,7 @@ async def post_tweet(
     snap = await snaps_dao.create_snaps_model(_content=incoming_message.content)
     insp = inspect(snap)
     _id = insp.attrs.id.value
-    return Tweet(id=(int(_id) if _id else 69420), author=str(insp.attrs.user_id.value), content=insp.attrs.content.value)
+    return Tweet(id=_id, author=str(insp.attrs.user_id.value), content=insp.attrs.content.value)
     
 @router.get("/tweet/{tweet_id}")
 async def get_tweet(tweet_id: int, snaps_dao: SnapDAO = Depends()) -> None:
