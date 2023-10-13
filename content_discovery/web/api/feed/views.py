@@ -1,9 +1,17 @@
 from fastapi import APIRouter, HTTPException
-from content_discovery.web.api.feed.schema import Tweet, FeedPack
+from content_discovery.web.api.feed.schema import Tweet, FeedPack, PostSnap
 
 router = APIRouter()
 
 
+@router.post("/post")
+def post_tweet(incoming_message: PostSnap) -> Tweet:
+    """
+    uploads a tweet with the received content
+    """
+    _content = incoming_message.content
+    return Tweet(id=42, author="Ada Lovelace", content=_content)
+    
 @router.get("/tweet/{tweet_id}")
 def get_tweet(tweet_id: int) -> None:
     """

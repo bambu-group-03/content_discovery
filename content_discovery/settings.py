@@ -41,7 +41,7 @@ class Settings(BaseSettings):
 
     # Variables for the database
     db_host: str = "localhost"
-    db_port: int = 5432
+    db_port: int = 5433
     db_user: str = "content_discovery"
     db_pass: str = "content_discovery"
     db_base: str = "content_discovery"

@@ -15,3 +15,11 @@ class FeedPack(BaseModel):
     Collection of tweets
     """
     tweets: Optional[List[int]]
+
+class PostSnap(BaseModel):
+    """
+    Snap posted by user
+    """
+    content: str
+
+
