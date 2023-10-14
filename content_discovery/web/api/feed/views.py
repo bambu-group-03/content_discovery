@@ -40,7 +40,12 @@ async def get_tweets(
     Returns a list of tweet ids
     """
     _tweets = []
-    snaps = await snaps_dao.get_from_user(user_id, 100, 0)
-    for snap in snaps:
-        _tweets.append(Tweet(id=snap.id, author=str(snap.user_id), content=snap.content))
+
+    # TODO: get list of users that user_id follows
+    # TEMP:
+    followed_users = [user_id]
+    for _id in followed_users:
+        snaps = await snaps_dao.get_from_user(_id, 100, 0)
+        for snap in snaps:
+            _tweets.append(Tweet(id=snap.id, author=str(snap.user_id), content=snap.content))
     return FeedPack(tweets=_tweets)
