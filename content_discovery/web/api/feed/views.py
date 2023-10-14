@@ -41,7 +41,7 @@ async def get_tweets(
     """
     _tweets = []
 
-    # TODO: get list of users that user_id follows
+    # TODO: get list of users that user_id follows from different microservice (identity socializer)
     # TEMP:
     followed_users = [user_id]
     for _id in followed_users:
