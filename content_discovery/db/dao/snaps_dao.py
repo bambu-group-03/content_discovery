@@ -14,14 +14,14 @@ class SnapDAO:
     def __init__(self, session: AsyncSession = Depends(get_db_session)):
         self.session = session
 
-    async def create_snaps_model(self,_content: str) -> SnapsModel:
+    async def create_snaps_model(self, user_id: int, _content: str) -> SnapsModel:
         """
         Add single snap to session.
 
         :param user_id
         :param content
         """
-        snap = SnapsModel(user_id=420,content=_content)
+        snap = SnapsModel(user_id= user_id,content=_content)
         self.session.add(snap)
         await self.session.flush()
         return snap
@@ -40,7 +40,7 @@ class SnapDAO:
 
         return list(raw_snaps.scalars().fetchall())
 
-    async def filter(
+    async def get_snap_from_id(
         self,
         id: int,
     ) -> SnapsModel:
@@ -54,3 +54,18 @@ class SnapDAO:
         query = query.where(SnapsModel.id == id)
         rows = await self.session.execute(query)
         return rows.scalars().first()
+    
+    async def get_from_user(
+        self,
+        user_id: int, limit: int, offset: int
+    ) -> SnapsModel:
+        """
+        Get specific snap model.
+
+        :param content: content of snap  instance.
+        :return: snap models.
+        """
+        query = select(SnapsModel)
+        query = query.where(SnapsModel.user_id == user_id).limit(limit).offset(offset)
+        rows = await self.session.execute(query)
+        return list(rows.scalars().fetchall())

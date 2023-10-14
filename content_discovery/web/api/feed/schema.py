@@ -20,6 +20,7 @@ class PostSnap(BaseModel):
     """
     Snap posted by user
     """
+    user_id: int
     content: str
 
 
