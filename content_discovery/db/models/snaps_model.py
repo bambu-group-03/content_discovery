@@ -1,5 +1,8 @@
+import datetime
+import uuid
+
 from sqlalchemy.orm import Mapped, mapped_column
-from sqlalchemy.sql.sqltypes import String
+from sqlalchemy.sql.sqltypes import DateTime, String, Uuid
 
 from content_discovery.db.base import Base
 
@@ -9,6 +12,16 @@ class SnapsModel(Base):
 
     __tablename__ = "snaps"
 
-    id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
-    user_id: Mapped[int] = mapped_column()
-    content: Mapped[str] = mapped_column(String(length=280)) 
+    length = 280
+
+    id: Mapped[uuid.UUID] = mapped_column(
+        Uuid,
+        default=uuid.uuid4,
+        primary_key=True,
+    )
+    user_id: Mapped[str] = mapped_column(String(length))
+    content: Mapped[str] = mapped_column(String(length))
+    created_at: Mapped[DateTime] = mapped_column(
+        DateTime,
+        default=datetime.datetime.utcnow(),
+    )
