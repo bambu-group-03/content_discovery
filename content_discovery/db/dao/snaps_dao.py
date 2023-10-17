@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import List
 
 from fastapi import Depends
 from sqlalchemy import select
@@ -21,7 +21,7 @@ class SnapDAO:
         :param user_id
         :param content
         """
-        snap = SnapsModel(user_id= user_id,content=_content)
+        snap = SnapsModel(user_id=user_id, content=_content)
         self.session.add(snap)
         await self.session.flush()
         return snap
@@ -42,22 +42,23 @@ class SnapDAO:
 
     async def get_snap_from_id(
         self,
-        id: int,
+        _id: int,
     ) -> SnapsModel:
         """
         Get specific snap model.
-
-        :param content: content of snap  instance.
+        :param _id: id of the snap
         :return: snap models.
         """
         query = select(SnapsModel)
-        query = query.where(SnapsModel.id == id)
+        query = query.where(SnapsModel.id == _id)
         rows = await self.session.execute(query)
         return rows.scalars().first()
-    
+
     async def get_from_user(
         self,
-        user_id: int, limit: int, offset: int
+        user_id: int,
+        limit: int,
+        offset: int,
     ) -> SnapsModel:
         """
         Get specific snap model.
