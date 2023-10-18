@@ -36,7 +36,6 @@ async def get_tweet(
 ) -> Tweet:
     """Gets a tweet."""
     tweet = await snaps_dao.get_snap_from_id(tweet_id)
-    print(f"\n\n\nTWWWEEETTTTTSSS: {tweet}")
     if tweet:
         return Tweet(id=tweet.id, author=str(tweet.user_id), content=tweet.content)
     raise HTTPException(status_code=NON_EXISTENT, detail="That tweet doesnt exist")
