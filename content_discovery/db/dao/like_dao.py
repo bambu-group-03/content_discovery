@@ -13,12 +13,13 @@ class LikeDAO:
         self.session = session
 
     async def create_like_model(self, user_id: str, snap_id: str) -> None:
-        """ Add single like to session. """
+        """Add single like to session."""
         self.session.add(LikeModel(user_id=user_id, snap_id=snap_id))
 
     async def delete_like_model(
         self,
-        user_id: str, snap_id: str
+        user_id: str,
+        snap_id: str,
     ) -> None:
         """Delete single like from session."""
         query = delete(LikeModel).where(
