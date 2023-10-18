@@ -5,9 +5,7 @@ from pydantic import BaseModel
 
 
 class Tweet(BaseModel):
-    """
-    Tweet
-    """
+    """Tweet"""
 
     id: uuid.UUID
     author: str
@@ -15,17 +13,13 @@ class Tweet(BaseModel):
 
 
 class FeedPack(BaseModel):
-    """
-    Collection of tweets
-    """
+    """Collection of tweets"""
 
     tweets: Optional[List[Tweet]]
 
 
 class PostSnap(BaseModel):
-    """
-    Snap posted by user
-    """
+    """Snap posted by user"""
 
     user_id: str
     content: str

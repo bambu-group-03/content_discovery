@@ -1,3 +1,6 @@
+import uuid
+from typing import Any
+
 from sqlalchemy import text
 from sqlalchemy.engine import make_url
 from sqlalchemy.ext.asyncio import create_async_engine
@@ -42,3 +45,13 @@ async def drop_database() -> None:
         )
         await conn.execute(text(disc_users))
         await conn.execute(text(f'DROP DATABASE "{settings.db_base}"'))
+
+
+def is_valid_uuid(value: Any) -> bool:
+    """Check if value is a valid uuid."""
+    try:
+        uuid.UUID(str(value))
+
+        return True
+    except ValueError:
+        return False
