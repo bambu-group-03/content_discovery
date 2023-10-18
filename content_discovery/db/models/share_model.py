@@ -15,13 +15,12 @@ class ShareModel(Base):
 
     length = 200
 
-    id: Mapped[uuid.UUID] = mapped_column(
+    user_id: Mapped[str] = mapped_column(String(length), primary_key=True)
+    snap_id: Mapped[uuid.UUID] = mapped_column(
         Uuid,
-        default=uuid.uuid4,
+        ForeignKey("snaps.id"),
         primary_key=True,
     )
-    user_id: Mapped[str] = mapped_column(String(length))
-    snap_id: Mapped[str] = mapped_column(String(length), ForeignKey("snaps.id"))
     created_at: Mapped[DateTime] = mapped_column(
         DateTime,
         default=datetime.datetime.utcnow(),
