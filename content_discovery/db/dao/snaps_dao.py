@@ -43,9 +43,10 @@ class SnapDAO:
     async def get_snap_from_id(
         self,
         _id: int,
-    ) -> SnapsModel:
+    ) -> SnapsModel | None:
         """
         Get specific snap model.
+
         :param _id: id of the snap
         :return: snap models.
         """
@@ -59,14 +60,16 @@ class SnapDAO:
         user_id: int,
         limit: int,
         offset: int,
-    ) -> SnapsModel:
+    ) -> list[SnapsModel]:
         """
-        Get specific snap model.
+        Get specific snap model from user.
 
-        :param content: content of snap  instance.
-        :return: snap models.
+        :param user_id:
+        :param limit: up to ho many snaps to get
+        :param offset: from where to begin providing results
         """
         query = select(SnapsModel)
-        query = query.where(SnapsModel.user_id == user_id).limit(limit).offset(offset)
+        query = query.where(SnapsModel.user_id == user_id)
+        query = query.limit(limit).offset(offset)
         rows = await self.session.execute(query)
         return list(rows.scalars().fetchall())
