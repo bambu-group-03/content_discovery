@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Union
 
 from fastapi import Depends
 from sqlalchemy import select
@@ -43,7 +43,7 @@ class SnapDAO:
     async def get_snap_from_id(
         self,
         _id: int,
-    ) -> SnapsModel | None:
+    ) -> Union[SnapsModel, None]:
         """
         Get specific snap model.
 
