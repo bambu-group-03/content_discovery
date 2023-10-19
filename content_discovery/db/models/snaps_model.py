@@ -23,5 +23,5 @@ class SnapsModel(Base):
     content: Mapped[str] = mapped_column(String(length))
     created_at: Mapped[DateTime] = mapped_column(
         DateTime,
-        default=datetime.datetime.utcnow(),
+        default=datetime.datetime.utcnow,
     )

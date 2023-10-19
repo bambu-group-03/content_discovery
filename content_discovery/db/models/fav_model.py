@@ -23,7 +23,7 @@ class FavModel(Base):
     )
     created_at: Mapped[DateTime] = mapped_column(
         DateTime,
-        default=datetime.datetime.utcnow(),
+        default=datetime.datetime.utcnow,
     )
 
     snap = relationship("SnapsModel", foreign_keys=[snap_id])
