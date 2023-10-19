@@ -18,7 +18,7 @@ async def post_tweet(
     """Uploads a tweet with the received content."""
     snap = await snaps_dao.create_snaps_model(
         user_id=incoming_message.user_id,
-        _content=incoming_message.content,
+        content=incoming_message.content,
     )
     insp = inspect(snap)
     i_d = insp.attrs.id.value
@@ -31,16 +31,10 @@ async def post_tweet(
 
 @router.get("/tweet/{tweet_id}")
 async def get_tweet(
-    user_id: int,
-    tweet_id: int,
+    tweet_id: str,
     snaps_dao: SnapDAO = Depends(),
 ) -> Tweet:
-    """Gets a tweet.
-
-    Args:
-    Returns:
-    Raises: HTTPException
-    """
+    """Gets a tweet."""
     tweet = await snaps_dao.get_snap_from_id(tweet_id)
     if tweet:
         return Tweet(id=tweet.id, author=str(tweet.user_id), content=tweet.content)
@@ -49,7 +43,7 @@ async def get_tweet(
 
 @router.get("/")
 async def get_tweets(
-    user_id: int,
+    user_id: str,
     snaps_dao: SnapDAO = Depends(),
 ) -> FeedPack:
     """Returns a list of tweet ids."""

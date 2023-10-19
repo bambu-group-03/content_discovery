@@ -6,6 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from content_discovery.db.dependencies import get_db_session
 from content_discovery.db.models.snaps_model import SnapsModel
+from content_discovery.db.utils import is_valid_uuid
 
 
 class SnapDAO:
@@ -14,14 +15,14 @@ class SnapDAO:
     def __init__(self, session: AsyncSession = Depends(get_db_session)):
         self.session = session
 
-    async def create_snaps_model(self, user_id: int, _content: str) -> SnapsModel:
+    async def create_snaps_model(self, user_id: str, content: str) -> SnapsModel:
         """
         Add single snap to session.
 
         :param user_id
         :param content
         """
-        snap = SnapsModel(user_id=user_id, content=_content)
+        snap = SnapsModel(user_id=user_id, content=content)
         self.session.add(snap)
         await self.session.flush()
         return snap
@@ -42,22 +43,19 @@ class SnapDAO:
 
     async def get_snap_from_id(
         self,
-        _id: int,
+        snap_id: str,
     ) -> Union[SnapsModel, None]:
-        """
-        Get specific snap model.
+        """Get specific snap model."""
+        if not is_valid_uuid(id):
+            return None
 
-        :param _id: id of the snap
-        :return: snap models.
-        """
-        query = select(SnapsModel)
-        query = query.where(SnapsModel.id == _id)
+        query = select(SnapsModel).where(SnapsModel.id == snap_id)
         rows = await self.session.execute(query)
         return rows.scalars().first()
 
     async def get_from_user(
         self,
-        user_id: int,
+        user_id: str,
         limit: int,
         offset: int,
     ) -> list[SnapsModel]:
