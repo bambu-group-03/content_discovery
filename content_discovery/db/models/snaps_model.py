@@ -6,8 +6,6 @@ from sqlalchemy.sql.sqltypes import DateTime, String, Uuid
 
 from content_discovery.db.base import Base
 
-TWEET_LEN = 280
-
 
 class SnapsModel(Base):
     """Model for demo purpose."""
