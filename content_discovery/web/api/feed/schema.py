@@ -5,11 +5,14 @@ from pydantic import BaseModel
 
 
 class Tweet(BaseModel):
-    """Tweet"""
+    """Tweet returned by API."""
 
     id: uuid.UUID
     author: str
     content: str
+    likes: int
+    shares: int
+    favs: int
 
 
 class FeedPack(BaseModel):
