@@ -4,8 +4,8 @@ from typing import List, Optional
 from pydantic import BaseModel
 
 
-class Tweet(BaseModel):
-    """Tweet"""
+class Snap(BaseModel):
+    """Snap"""
 
     id: uuid.UUID
     author: str
@@ -13,9 +13,9 @@ class Tweet(BaseModel):
 
 
 class FeedPack(BaseModel):
-    """Collection of tweets"""
+    """Collection of snaps"""
 
-    tweets: Optional[List[Tweet]]
+    snaps: Optional[List[Snap]]
 
 
 class PostSnap(BaseModel):
