@@ -2,7 +2,7 @@ import datetime
 import uuid
 
 from sqlalchemy.orm import Mapped, mapped_column
-from sqlalchemy.sql.sqltypes import DateTime, String, Uuid
+from sqlalchemy.sql.sqltypes import DateTime, Integer, String, Uuid
 
 from content_discovery.db.base import Base
 
@@ -21,6 +21,9 @@ class SnapsModel(Base):
     )
     user_id: Mapped[str] = mapped_column(String(length))
     content: Mapped[str] = mapped_column(String(length))
+    likes: Mapped[int] = mapped_column(Integer, default=0)
+    shares: Mapped[int] = mapped_column(Integer, default=0)
+    favs: Mapped[int] = mapped_column(Integer, default=0)
     created_at: Mapped[DateTime] = mapped_column(
         DateTime,
         default=datetime.datetime.utcnow,

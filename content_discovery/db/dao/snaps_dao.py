@@ -1,7 +1,7 @@
 from typing import List, Union
 
 from fastapi import Depends
-from sqlalchemy import select
+from sqlalchemy import select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from content_discovery.db.dependencies import get_db_session
@@ -46,7 +46,7 @@ class SnapDAO:
         snap_id: str,
     ) -> Union[SnapsModel, None]:
         """Get specific snap model."""
-        if not is_valid_uuid(id):
+        if not is_valid_uuid(snap_id):
             return None
 
         query = select(SnapsModel).where(SnapsModel.id == snap_id)
@@ -71,3 +71,51 @@ class SnapDAO:
         query = query.limit(limit).offset(offset)
         rows = await self.session.execute(query)
         return list(rows.scalars().fetchall())
+
+    async def update_likes(
+        self,
+        snap_id: str,
+        updated_likes: int,
+    ) -> None:
+        """Update likes counter."""
+        stmt = (
+            update(SnapsModel)
+            .where(SnapsModel.id == snap_id)
+            .values(
+                likes=updated_likes,
+            )
+        )
+
+        await self.session.execute(stmt)
+
+    async def update_shares(
+        self,
+        snap_id: str,
+        updated_shares: int,
+    ) -> None:
+        """Update shares counter."""
+        stmt = (
+            update(SnapsModel)
+            .where(SnapsModel.id == snap_id)
+            .values(
+                shares=updated_shares,
+            )
+        )
+
+        await self.session.execute(stmt)
+
+    async def update_favs(
+        self,
+        snap_id: str,
+        updated_favs: int,
+    ) -> None:
+        """Update favs counter."""
+        stmt = (
+            update(SnapsModel)
+            .where(SnapsModel.id == snap_id)
+            .values(
+                favs=updated_favs,
+            )
+        )
+
+        await self.session.execute(stmt)

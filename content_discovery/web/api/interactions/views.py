@@ -4,6 +4,7 @@ from fastapi.param_functions import Depends
 from content_discovery.db.dao.fav_dao import FavDAO
 from content_discovery.db.dao.like_dao import LikeDAO
 from content_discovery.db.dao.share_dao import ShareDAO
+from content_discovery.db.dao.snaps_dao import SnapDAO
 
 router = APIRouter()
 
@@ -13,9 +14,20 @@ async def like_snap(
     user_id: str,
     snap_id: str,
     like_dao: LikeDAO = Depends(),
+    snap_dao: SnapDAO = Depends(),
 ) -> None:
     """User likes a snap."""
-    await like_dao.create_like_model(user_id=user_id, snap_id=snap_id)
+    snap = await snap_dao.get_snap_from_id(snap_id)
+
+    if not snap:
+        return
+
+    like = await like_dao.create_like_model(user_id=user_id, snap_id=snap_id)
+
+    if not like:
+        return
+
+    await snap_dao.update_likes(snap_id=snap_id, updated_likes=snap.likes + 1)
 
 
 @router.delete("/{user_id}/unlike/{snap_id}")

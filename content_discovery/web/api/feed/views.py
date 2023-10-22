@@ -26,6 +26,9 @@ async def post_tweet(
         id=i_d,
         author=str(insp.attrs.user_id.value),
         content=insp.attrs.content.value,
+        likes=insp.attrs.likes.value,
+        shares=insp.attrs.shares.value,
+        favs=insp.attrs.favs.value,
     )
 
 
@@ -37,7 +40,14 @@ async def get_tweet(
     """Gets a tweet."""
     tweet = await snaps_dao.get_snap_from_id(tweet_id)
     if tweet:
-        return Tweet(id=tweet.id, author=str(tweet.user_id), content=tweet.content)
+        return Tweet(
+            id=tweet.id,
+            author=str(tweet.user_id),
+            content=tweet.content,
+            likes=tweet.likes,
+            shares=tweet.shares,
+            favs=tweet.favs,
+        )
     raise HTTPException(status_code=NON_EXISTENT, detail="That tweet doesnt exist")
 
 
@@ -57,6 +67,13 @@ async def get_tweets(
         snaps = await snaps_dao.get_from_user(i_d, 100, 0)
         for snap in iter(snaps):
             my_tweets.append(
-                Tweet(id=snap.id, author=str(snap.user_id), content=snap.content),
+                Tweet(
+                    id=snap.id,
+                    author=str(snap.user_id),
+                    content=snap.content,
+                    likes=snap.likes,
+                    shares=snap.shares,
+                    favs=snap.favs,
+                ),
             )
     return FeedPack(tweets=my_tweets)
