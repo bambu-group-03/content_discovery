@@ -26,6 +26,9 @@ async def post_snap(
         id=i_d,
         author=str(insp.attrs.user_id.value),
         content=insp.attrs.content.value,
+        likes=insp.attrs.likes.value,
+        shares=insp.attrs.shares.value,
+        favs=insp.attrs.favs.value,
     )
 
 
@@ -37,9 +40,15 @@ async def get_snap(
     """Gets a snap."""
     snap = await snaps_dao.get_snap_from_id(snap_id)
     if snap:
-        return Snap(id=snap.id, author=str(snap.user_id), content=snap.content)
-    raise HTTPException(status_code=NON_EXISTENT, detail="That snap doesnt exist")
-
+        return Snap(
+            id=snap.id,
+            author=str(snap.user_id),
+            content=snap.content,
+            likes=snap.likes,
+            shares=snap.shares,
+            favs=snap.favs,
+        )
+    raise HTTPException(status_code=NON_EXISTENT, detail="That tweet doesnt exist")
 
 @router.get("/")
 async def get_snaps(
@@ -57,6 +66,13 @@ async def get_snaps(
         snaps = await snaps_dao.get_from_user(i_d, 100, 0)
         for snap in iter(snaps):
             my_snaps.append(
-                Snap(id=snap.id, author=str(snap.user_id), content=snap.content),
+                Snap(
+                    id=snap.id,
+                    author=str(snap.user_id),
+                    content=snap.content,
+                    likes=snap.likes,
+                    shares=snap.shares,
+                    favs=snap.favs,
+                )
             )
     return FeedPack(snaps=my_snaps)
