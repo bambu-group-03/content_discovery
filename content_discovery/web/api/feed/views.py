@@ -50,6 +50,7 @@ async def get_snap(
         )
     raise HTTPException(status_code=NON_EXISTENT, detail="That tweet doesnt exist")
 
+
 @router.get("/")
 async def get_snaps(
     user_id: str,
@@ -73,6 +74,6 @@ async def get_snaps(
                     likes=snap.likes,
                     shares=snap.shares,
                     favs=snap.favs,
-                )
+                ),
             )
     return FeedPack(snaps=my_snaps)
