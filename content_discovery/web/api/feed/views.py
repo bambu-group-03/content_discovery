@@ -29,7 +29,7 @@ async def post_snap(
         likes=insp.attrs.likes.value,
         shares=insp.attrs.shares.value,
         favs=insp.attrs.favs.value,
-        created_at=insp.attrs.created_at.value.python_type,
+        created_at=insp.attrs.created_at.value,
     )
 
 
@@ -48,7 +48,7 @@ async def get_snap(
             likes=snap.likes,
             shares=snap.shares,
             favs=snap.favs,
-            created_at=snap.created_at.python_type,
+            created_at=snap.created_at,
         )
     raise HTTPException(status_code=NON_EXISTENT, detail="That tweet doesnt exist")
 
@@ -65,20 +65,18 @@ async def get_snaps(
     # from different microservice (identity socializer)
     # TEMP:
     snaps = await snaps_dao.get_from_user(user_id, 100, 0)
-    for snap in iter(snaps):
-        if getattr(snap.created_at, "python_type", False):
-            ugly_hack_created_at = snap.created_at.python_type
-        else:
-            ugly_hack_created_at = snap.created_at
+    for a_snap in iter(snaps):
+        created_at = a_snap.created_at
+        print(created_at.__class__)
         my_snaps.append(
             Snap(
-                id=snap.id,
-                author=str(snap.user_id),
-                content=snap.content,
-                likes=snap.likes,
-                shares=snap.shares,
-                favs=snap.favs,
-                created_at=ugly_hack_created_at,
+                id=a_snap.id,
+                author=str(a_snap.user_id),
+                content=a_snap.content,
+                likes=a_snap.likes,
+                shares=a_snap.shares,
+                favs=a_snap.favs,
+                created_at=created_at,
             ),
         )
     return FeedPack(snaps=my_snaps)
