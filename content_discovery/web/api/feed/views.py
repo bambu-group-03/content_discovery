@@ -29,6 +29,7 @@ async def post_snap(
         likes=insp.attrs.likes.value,
         shares=insp.attrs.shares.value,
         favs=insp.attrs.favs.value,
+        created_at=insp.attrs.created_at.value.python_type,
     )
 
 
@@ -47,6 +48,7 @@ async def get_snap(
             likes=snap.likes,
             shares=snap.shares,
             favs=snap.favs,
+            created_at=snap.created_at.python_type,
         )
     raise HTTPException(status_code=NON_EXISTENT, detail="That tweet doesnt exist")
 
@@ -74,6 +76,7 @@ async def get_snaps(
                     likes=snap.likes,
                     shares=snap.shares,
                     favs=snap.favs,
+                    created_at=snap.created_at.python_type,
                 ),
             )
     return FeedPack(snaps=my_snaps)

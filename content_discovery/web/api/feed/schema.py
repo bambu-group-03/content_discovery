@@ -1,4 +1,5 @@
 import uuid
+from datetime import datetime
 from typing import List, Optional
 
 from pydantic import BaseModel
@@ -13,6 +14,7 @@ class Snap(BaseModel):
     likes: int
     shares: int
     favs: int
+    created_at: datetime
 
 
 class FeedPack(BaseModel):
