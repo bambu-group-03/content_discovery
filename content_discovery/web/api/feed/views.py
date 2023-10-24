@@ -82,7 +82,7 @@ async def get_snaps(
     return FeedPack(snaps=my_snaps)
 
 
-@router.delete("/delete-tweet/{snap_id}")
+@router.delete("/delete-snap/{snap_id}")
 async def delete_snap(
     snap_id: str,
     snap_dao: SnapDAO = Depends(),
