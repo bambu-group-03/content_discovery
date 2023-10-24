@@ -1,7 +1,7 @@
 from typing import List, Union
 
 from fastapi import Depends
-from sqlalchemy import select, update
+from sqlalchemy import delete, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from content_discovery.db.dependencies import get_db_session
@@ -26,6 +26,19 @@ class SnapDAO:
         self.session.add(snap)
         await self.session.flush()
         return snap
+
+    async def delete_snap(
+        self,
+        snap_id: str,
+    ) -> None:
+        """
+        Delete given snap
+
+        :param user_id
+        """
+        query = delete(SnapsModel).where(SnapsModel.id == snap_id)
+        await self.session.execute(query)
+        await self.session.flush()
 
     async def get_all_snaps(self, limit: int, offset: int) -> List[SnapsModel]:
         """
