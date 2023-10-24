@@ -21,7 +21,7 @@ class ShareModel(Base):
         ForeignKey("snaps.id"),
         primary_key=True,
     )
-    created_at: Mapped[DateTime] = mapped_column(
+    created_at: Mapped[datetime.datetime] = mapped_column(
         DateTime,
         default=datetime.datetime.utcnow,
     )
