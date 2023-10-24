@@ -56,6 +56,8 @@ async def get_snap(
 @router.get("/")
 async def get_snaps(
     user_id: str,
+    limit: int = 10,
+    offset: int = 0,
     snaps_dao: SnapDAO = Depends(),
 ) -> FeedPack:
     """Returns a list of snap ids."""
@@ -64,7 +66,7 @@ async def get_snaps(
     # TODO: get list of users that user_id follows
     # from different microservice (identity socializer)
     # TEMP:
-    snaps = await snaps_dao.get_from_user(user_id, 100, 0)
+    snaps = await snaps_dao.get_from_user(user_id, limit, offset)
     for a_snap in iter(snaps):
         created_at = a_snap.created_at
         print(created_at.__class__)
