@@ -72,49 +72,91 @@ class SnapDAO:
         rows = await self.session.execute(query)
         return list(rows.scalars().fetchall())
 
-    async def update_likes(
+    async def increase_likes(
         self,
         snap_id: str,
-        updated_likes: int,
     ) -> None:
-        """Update likes counter."""
+        """Increase likes counter."""
         stmt = (
             update(SnapsModel)
             .where(SnapsModel.id == snap_id)
             .values(
-                likes=updated_likes,
+                likes=SnapsModel.likes + 1,
             )
         )
 
         await self.session.execute(stmt)
 
-    async def update_shares(
+    async def decrease_likes(
         self,
         snap_id: str,
-        updated_shares: int,
     ) -> None:
-        """Update shares counter."""
+        """Decrease likes counter."""
         stmt = (
             update(SnapsModel)
             .where(SnapsModel.id == snap_id)
             .values(
-                shares=updated_shares,
+                likes=SnapsModel.likes - 1,
             )
         )
 
         await self.session.execute(stmt)
 
-    async def update_favs(
+    async def increase_shares(
         self,
         snap_id: str,
-        updated_favs: int,
     ) -> None:
-        """Update favs counter."""
+        """Increase shares counter."""
         stmt = (
             update(SnapsModel)
             .where(SnapsModel.id == snap_id)
             .values(
-                favs=updated_favs,
+                shares=SnapsModel.shares + 1,
+            )
+        )
+
+        await self.session.execute(stmt)
+
+    async def decrease_shares(
+        self,
+        snap_id: str,
+    ) -> None:
+        """Decrease shares counter."""
+        stmt = (
+            update(SnapsModel)
+            .where(SnapsModel.id == snap_id)
+            .values(
+                shares=SnapsModel.shares - 1,
+            )
+        )
+
+        await self.session.execute(stmt)
+
+    async def increase_favs(
+        self,
+        snap_id: str,
+    ) -> None:
+        """Increase favs counter."""
+        stmt = (
+            update(SnapsModel)
+            .where(SnapsModel.id == snap_id)
+            .values(
+                favs=SnapsModel.favs + 1,
+            )
+        )
+
+        await self.session.execute(stmt)
+
+    async def decrease_favs(
+        self,
+        snap_id: str,
+    ) -> None:
+        """Decrease favs counter."""
+        stmt = (
+            update(SnapsModel)
+            .where(SnapsModel.id == snap_id)
+            .values(
+                favs=SnapsModel.favs - 1,
             )
         )
 
