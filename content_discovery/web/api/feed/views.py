@@ -91,12 +91,3 @@ async def get_snaps(
             ),
         )
     return FeedPack(snaps=my_snaps)
-
-
-@router.delete("/delete-snap/{snap_id}")
-async def delete_snap(
-    snap_id: str,
-    snap_dao: SnapDAO = Depends(),
-) -> None:
-    """User deletes a snap."""
-    await snap_dao.delete_snap(snap_id)
