@@ -1,10 +1,12 @@
 import datetime
 import uuid
+from typing import List
 
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql.sqltypes import DateTime, Integer, String, Uuid
 
 from content_discovery.db.base import Base
+from content_discovery.db.models.fav_model import FavModel
 
 
 class SnapsModel(Base):
@@ -28,3 +30,5 @@ class SnapsModel(Base):
         DateTime,
         default=datetime.datetime.utcnow,
     )
+
+    list_favs: Mapped[List["FavModel"]] = relationship(back_populates="snap")
