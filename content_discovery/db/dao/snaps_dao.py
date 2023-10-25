@@ -66,6 +66,17 @@ class SnapDAO:
         rows = await self.session.execute(query)
         return rows.scalars().first()
 
+    async def delete(
+        self,
+        snap_id: str,
+    ) -> None:
+        """Delete specific snap model."""
+        if not is_valid_uuid(snap_id):
+            return
+
+        query = delete(SnapsModel).where(SnapsModel.id == snap_id)
+        await self.session.execute(query)
+
     async def get_from_user(
         self,
         user_id: str,
