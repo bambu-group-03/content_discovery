@@ -32,6 +32,13 @@ async def post_snap(
         created_at=insp.attrs.created_at.value,
     )
 
+@router.delete("/snap/{snap_id}")
+async def post_snap(
+    snap_id: str,
+    snaps_dao: SnapDAO = Depends(),
+) -> None:
+    """Gets a snap."""
+    await snaps_dao.delete(snap_id)
 
 @router.get("/snap/{snap_id}")
 async def get_snap(
