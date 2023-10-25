@@ -31,4 +31,7 @@ class SnapsModel(Base):
         default=datetime.datetime.utcnow,
     )
 
-    list_favs: Mapped[List["FavModel"]] = relationship(back_populates="snap", cascade="all, delete")
+    list_favs: Mapped[List["FavModel"]] = relationship(
+        back_populates="snap",
+        cascade="all, delete",
+    )

@@ -1,7 +1,7 @@
 from typing import List, Union
 
 from fastapi import Depends
-from sqlalchemy import select, update, delete
+from sqlalchemy import delete, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from content_discovery.db.dependencies import get_db_session
@@ -56,14 +56,13 @@ class SnapDAO:
     async def delete(
         self,
         snap_id: str,
-    ) -> Union[SnapsModel, None]:
-        """Get specific snap model."""
+    ) -> None:
+        """Delete specific snap model."""
         if not is_valid_uuid(snap_id):
-            return None
+            return
 
         query = delete(SnapsModel).where(SnapsModel.id == snap_id)
         await self.session.execute(query)
-
 
     async def get_from_user(
         self,
