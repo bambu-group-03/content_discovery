@@ -39,7 +39,7 @@ async def delete_snap(
     snaps_dao: SnapDAO = Depends(),
 ) -> None:
     """Deletes a snap."""
-    await snaps_dao.delete(snap_id)
+    await snaps_dao.delete_snap(snap_id)
 
 
 @router.get("/snap/{snap_id}")
