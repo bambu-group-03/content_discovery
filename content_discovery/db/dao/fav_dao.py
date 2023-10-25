@@ -1,9 +1,12 @@
+from typing import Optional
+
 from fastapi import Depends
-from sqlalchemy import delete
+from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from content_discovery.db.dependencies import get_db_session
 from content_discovery.db.models.fav_model import FavModel
+from content_discovery.db.utils import is_valid_uuid
 
 
 class FavDAO:
@@ -12,9 +15,17 @@ class FavDAO:
     def __init__(self, session: AsyncSession = Depends(get_db_session)):
         self.session = session
 
-    async def create_fav_model(self, user_id: str, snap_id: str) -> None:
+    async def create_fav_model(self, user_id: str, snap_id: str) -> Optional[FavModel]:
         """Add single fav to session."""
-        self.session.add(FavModel(user_id=user_id, snap_id=snap_id))
+        try:
+            fav = FavModel(user_id=user_id, snap_id=snap_id)
+
+            self.session.add(fav)
+            await self.session.flush()
+
+            return fav
+        except Exception:
+            return None
 
     async def delete_fav_model(
         self,
@@ -27,3 +38,19 @@ class FavDAO:
             FavModel.snap_id == snap_id,
         )
         await self.session.execute(query)
+
+    async def get_fav_model(
+        self,
+        user_id: str,
+        snap_id: str,
+    ) -> Optional[FavModel]:
+        """Get single fav from session."""
+        if not is_valid_uuid(snap_id):
+            return None
+
+        query = select(FavModel).where(
+            FavModel.user_id == user_id,
+            FavModel.snap_id == snap_id,
+        )
+        result = await self.session.execute(query)
+        return result.scalars().first()
