@@ -1,10 +1,13 @@
 from typing import List, Union
 
 from fastapi import Depends
-from sqlalchemy import select, update
+from sqlalchemy import delete, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from content_discovery.db.dependencies import get_db_session
+from content_discovery.db.models.fav_model import FavModel
+from content_discovery.db.models.like_model import LikeModel
+from content_discovery.db.models.share_model import ShareModel
 from content_discovery.db.models.snaps_model import SnapsModel
 from content_discovery.db.utils import is_valid_uuid
 
@@ -26,6 +29,54 @@ class SnapDAO:
         self.session.add(snap)
         await self.session.flush()
         return snap
+
+    async def delete_snap(
+        self,
+        snap_id: str,
+    ) -> None:
+        """
+        Delete given snap and its interactions.
+
+        :param user_id
+        """
+        if not is_valid_uuid(snap_id):
+            return
+
+        # Delete snap likes
+        await self.delete_snap_likes(snap_id=snap_id)
+
+        # Delete snap shares
+        await self.delete_snap_shares(snap_id)
+
+        # Delete snap favs
+        await self.delete_snap_favs(snap_id)
+
+        query = delete(SnapsModel).where(SnapsModel.id == snap_id)
+        await self.session.execute(query)
+
+    async def delete_snap_likes(
+        self,
+        snap_id: str,
+    ) -> None:
+        """Delete specific snap likes."""
+        query = delete(LikeModel).where(LikeModel.snap_id == snap_id)
+        await self.session.execute(query)
+
+    async def delete_snap_shares(
+        self,
+        snap_id: str,
+    ) -> None:
+        """Delete specific snap shares."""
+        query = delete(ShareModel).where(ShareModel.snap_id == snap_id)
+        await self.session.execute(query)
+
+    async def delete_snap_favs(
+        self,
+        snap_id: str,
+    ) -> None:
+        """Delete specific snap favs."""
+        query = delete(FavModel).where(FavModel.snap_id == snap_id)
+        await self.session.execute(query)
 
     async def get_all_snaps(self, limit: int, offset: int) -> List[SnapsModel]:
         """
