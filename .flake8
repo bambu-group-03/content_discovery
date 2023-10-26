@@ -81,7 +81,8 @@ ignore =
   ; Missing "Returns" in Docstring: - return
   DAR201,
   ; Missing parameter(s) in Docstring
-  DAR101
+  DAR101,
+  E800
 
 per-file-ignores =
   ; all tests
