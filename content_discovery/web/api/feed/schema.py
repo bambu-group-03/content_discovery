@@ -15,6 +15,7 @@ class Snap(BaseModel):
     shares: int
     favs: int
     created_at: datetime
+    parent_id: Optional[uuid.UUID]
 
 
 class FeedPack(BaseModel):
@@ -27,4 +28,5 @@ class PostSnap(BaseModel):
     """Snap posted by user"""
 
     user_id: str
+    parent_id: Optional[str]
     content: str
