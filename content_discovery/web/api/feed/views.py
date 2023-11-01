@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import List, Optional
 
 from fastapi import APIRouter, HTTPException
 from fastapi.param_functions import Depends
@@ -112,3 +112,13 @@ async def get_snaps(
             ),
         )
     return FeedPack(snaps=my_snaps)
+
+
+@router.get("/get_all_snaps", response_model=None)
+async def get_all_snaps(
+    limit: int = 10,
+    offset: int = 0,
+    snaps_dao: SnapDAO = Depends(),
+) -> List[SnapsModel]:
+    """Returns a list of snaps"""
+    return await snaps_dao.get_all_snaps(limit=limit, offset=offset)
