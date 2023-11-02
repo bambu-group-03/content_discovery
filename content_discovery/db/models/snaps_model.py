@@ -1,7 +1,8 @@
 import datetime
 import uuid
 
-from sqlalchemy.orm import Mapped, mapped_column
+from sqlalchemy import ForeignKey
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql.sqltypes import DateTime, Integer, String, Uuid
 
 from content_discovery.db.base import Base
@@ -20,6 +21,11 @@ class SnapsModel(Base):
         primary_key=True,
     )
     user_id: Mapped[str] = mapped_column(String(length))
+    parent_id: Mapped[uuid.UUID] = mapped_column(
+        Uuid,
+        ForeignKey("snaps.id"),
+        nullable=True,
+    )
     content: Mapped[str] = mapped_column(String(length))
     likes: Mapped[int] = mapped_column(Integer, default=0)
     shares: Mapped[int] = mapped_column(Integer, default=0)
@@ -28,3 +34,5 @@ class SnapsModel(Base):
         DateTime,
         default=datetime.datetime.utcnow,
     )
+
+    snap = relationship("SnapsModel", foreign_keys=[parent_id])
