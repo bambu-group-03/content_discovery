@@ -1,5 +1,6 @@
 from typing import List, Optional
 
+import httpx
 from fastapi import APIRouter, HTTPException
 from fastapi.param_functions import Depends
 from sqlalchemy import inspect
@@ -7,6 +8,7 @@ from sqlalchemy import inspect
 from content_discovery.db.dao.hashtag_dao import HashtagDAO
 from content_discovery.db.dao.snaps_dao import SnapDAO
 from content_discovery.db.models.snaps_model import SnapsModel
+from content_discovery.settings import settings
 from content_discovery.web.api.feed.schema import FeedPack, PostReply, PostSnap, Snap
 
 router = APIRouter()
@@ -105,10 +107,42 @@ async def get_snaps(
 ) -> FeedPack:
     """Returns a list of snap ids."""
     my_snaps = []
+    # TODO: parse response into a list of ids
 
-    # TODO: get list of users that user_id follows
-    # from different microservice (identity socializer)
-    # TEMP:
+    for user in httpx.get(_url_get_following(user_id)).json():
+        snaps = await snaps_dao.get_from_user(user["id"], limit, offset)
+        for a_snap in iter(snaps):
+            created_at = a_snap.created_at
+            print(created_at.__class__)
+            my_snaps.append(
+                Snap(
+                    id=a_snap.id,
+                    author=str(a_snap.user_id),
+                    content=a_snap.content,
+                    likes=a_snap.likes,
+                    shares=a_snap.shares,
+                    favs=a_snap.favs,
+                    created_at=created_at,
+                    parent_id=a_snap.parent_id,
+                ),
+            )
+    return FeedPack(snaps=my_snaps)
+
+
+@router.get("/{user_id}/snaps")
+async def get_snaps_from_user(
+    user_id: str,
+    limit: int = 10,
+    offset: int = 0,
+    snaps_dao: SnapDAO = Depends(),
+) -> FeedPack:
+    """
+    Returns a list of snap ids.
+
+    WARNING: Does not check if user requested is valid.
+    If user does not exist, returns empty list.
+    """
+    my_snaps = []
     snaps = await snaps_dao.get_from_user(user_id, limit, offset)
     for a_snap in iter(snaps):
         created_at = a_snap.created_at
@@ -125,6 +159,10 @@ async def get_snaps(
             ),
         )
     return FeedPack(snaps=my_snaps)
+
+
+def _url_get_following(user_id: str) -> str:
+    return f"{settings.identity_socializer_url}/api/auth/{user_id}/following"
 
 
 @router.get("/get_all_snaps", response_model=None)
