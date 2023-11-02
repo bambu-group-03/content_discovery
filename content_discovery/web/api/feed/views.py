@@ -94,13 +94,18 @@ async def get_snaps(
 
 
 @router.get("/{user_id}/snaps")
-async def get_snaps(
+async def get_snaps_from_user(
     user_id: str,
     limit: int = 10,
     offset: int = 0,
     snaps_dao: SnapDAO = Depends(),
 ) -> FeedPack:
-    """Returns a list of snap ids."""
+    """
+    Returns a list of snap ids.
+
+    WARNING: Does not check if user requested is valid.
+    If user does not exist, returns empty list.
+    """
     my_snaps = []
     snaps = await snaps_dao.get_from_user(user_id, limit, offset)
     for a_snap in iter(snaps):
