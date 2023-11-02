@@ -36,6 +36,7 @@ async def post_snap(
         favs=insp.attrs.favs.value,
         created_at=insp.attrs.created_at.value,
         parent_id=insp.attrs.parent_id.value,
+        visibility=insp.attrs.visibility.value,
     )
 
 
@@ -81,6 +82,7 @@ async def get_snap(
             favs=snap.favs,
             created_at=snap.created_at,
             parent_id=snap.parent_id,
+            visibility=snap.visibility,
         )
     raise HTTPException(status_code=NON_EXISTENT, detail="That tweet doesnt exist")
 
@@ -111,6 +113,7 @@ async def get_snaps(
                     favs=a_snap.favs,
                     created_at=created_at,
                     parent_id=a_snap.parent_id,
+                    visibility=a_snap.visibility,
                 ),
             )
     return FeedPack(snaps=my_snaps)
@@ -143,6 +146,7 @@ async def get_snaps_from_user(
                 favs=a_snap.favs,
                 created_at=created_at,
                 parent_id=a_snap.parent_id,
+                visibility=a_snap.visibility,
             ),
         )
     return FeedPack(snaps=my_snaps)

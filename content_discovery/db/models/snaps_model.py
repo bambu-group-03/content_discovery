@@ -1,11 +1,19 @@
 import datetime
 import uuid
+from enum import Enum
 
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql.sqltypes import DateTime, Integer, String, Uuid
 
 from content_discovery.db.base import Base
+
+
+class Visibility(Enum):
+    """Enum for the visibility of a snap"""
+
+    PUBLIC = 1
+    PRIVATE = 2
 
 
 class SnapsModel(Base):
@@ -34,5 +42,7 @@ class SnapsModel(Base):
         DateTime,
         default=datetime.datetime.utcnow,
     )
+
+    visibility: Mapped[int] = mapped_column(Integer, default=Visibility.PUBLIC)
 
     snap = relationship("SnapsModel", foreign_keys=[parent_id])

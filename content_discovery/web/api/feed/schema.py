@@ -16,6 +16,7 @@ class Snap(BaseModel):
     favs: int
     created_at: datetime
     parent_id: Optional[uuid.UUID]
+    visibility: int
 
 
 class FeedPack(BaseModel):
