@@ -253,3 +253,15 @@ class SnapDAO:
         )
 
         await self.session.execute(stmt)
+
+    async def filter_snaps(
+        self,
+        content: str,
+    ) -> List[SnapsModel]:
+        """Get list of filtered snaps by content."""
+        query = select(SnapsModel).distinct()
+        query = query.filter(SnapsModel.content.ilike(f"%{content}%"))
+
+        rows = await self.session.execute(query)
+
+        return list(rows.scalars().fetchall())
