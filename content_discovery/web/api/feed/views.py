@@ -91,3 +91,30 @@ async def get_snaps(
             ),
         )
     return FeedPack(snaps=my_snaps)
+
+
+@router.get("/{user_id}/snaps")
+async def get_snaps(
+    user_id: str,
+    limit: int = 10,
+    offset: int = 0,
+    snaps_dao: SnapDAO = Depends(),
+) -> FeedPack:
+    """Returns a list of snap ids."""
+    my_snaps = []
+    snaps = await snaps_dao.get_from_user(user_id, limit, offset)
+    for a_snap in iter(snaps):
+        created_at = a_snap.created_at
+        print(created_at.__class__)
+        my_snaps.append(
+            Snap(
+                id=a_snap.id,
+                author=str(a_snap.user_id),
+                content=a_snap.content,
+                likes=a_snap.likes,
+                shares=a_snap.shares,
+                favs=a_snap.favs,
+                created_at=created_at,
+            ),
+        )
+    return FeedPack(snaps=my_snaps)
