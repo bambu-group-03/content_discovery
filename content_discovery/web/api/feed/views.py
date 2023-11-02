@@ -73,20 +73,9 @@ async def get_snaps(
 ) -> FeedPack:
     """Returns a list of snap ids."""
     my_snaps = []
-
-    # TODO: get list of users that user_id follows
-    # from different microservice (identity socializer)
-    # TEMP:
-
-    # TEMP: dummy ping
-    url = f"{settings.identity_socializer_url}/api/auth/{user_id}/following"
-    print(url)
-    response = httpx.get(url)
     # TODO: parse response into a list of ids
-    followed_users = response.json()
-    # message = response.json().get("message")
 
-    for user in followed_users:
+    for user in httpx.get(_url_get_following(user_id)).json():
         snaps = await snaps_dao.get_from_user(user["id"], limit, offset)
         for a_snap in iter(snaps):
             created_at = a_snap.created_at
@@ -103,3 +92,7 @@ async def get_snaps(
                 ),
             )
     return FeedPack(snaps=my_snaps)
+
+
+def _url_get_following(user_id: str) -> str:
+    return f"{settings.identity_socializer_url}/api/auth/{user_id}/following"
