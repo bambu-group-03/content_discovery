@@ -1,8 +1,10 @@
+import httpx
 from fastapi import APIRouter, HTTPException
 from fastapi.param_functions import Depends
 from sqlalchemy import inspect
 
 from content_discovery.db.dao.snaps_dao import SnapDAO
+from content_discovery.settings import settings
 from content_discovery.web.api.feed.schema import FeedPack, PostSnap, Snap
 
 router = APIRouter()
@@ -71,25 +73,24 @@ async def get_snaps(
 ) -> FeedPack:
     """Returns a list of snap ids."""
     my_snaps = []
+    # TODO: parse response into a list of ids
 
-    # TODO: get list of users that user_id follows
-    # from different microservice (identity socializer)
-    # TEMP:
-    snaps = await snaps_dao.get_from_user(user_id, limit, offset)
-    for a_snap in iter(snaps):
-        created_at = a_snap.created_at
-        print(created_at.__class__)
-        my_snaps.append(
-            Snap(
-                id=a_snap.id,
-                author=str(a_snap.user_id),
-                content=a_snap.content,
-                likes=a_snap.likes,
-                shares=a_snap.shares,
-                favs=a_snap.favs,
-                created_at=created_at,
-            ),
-        )
+    for user in httpx.get(_url_get_following(user_id)).json():
+        snaps = await snaps_dao.get_from_user(user["id"], limit, offset)
+        for a_snap in iter(snaps):
+            created_at = a_snap.created_at
+            print(created_at.__class__)
+            my_snaps.append(
+                Snap(
+                    id=a_snap.id,
+                    author=str(a_snap.user_id),
+                    content=a_snap.content,
+                    likes=a_snap.likes,
+                    shares=a_snap.shares,
+                    favs=a_snap.favs,
+                    created_at=created_at,
+                ),
+            )
     return FeedPack(snaps=my_snaps)
 
 
@@ -123,3 +124,7 @@ async def get_snaps_from_user(
             ),
         )
     return FeedPack(snaps=my_snaps)
+
+
+def _url_get_following(user_id: str) -> str:
+    return f"{settings.identity_socializer_url}/api/auth/{user_id}/following"
