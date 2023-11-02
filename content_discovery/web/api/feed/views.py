@@ -84,10 +84,9 @@ async def get_snaps(
         f"{settings.identity_socializer_url}/api/echo/",
         json={"message": f"This is a user: {str(user_id)}"},
     )
-    print(response.content)
     # TODO: parse response into a list of ids
     followed_users = [user_id]
-    message = response.json().get("message")
+    # message = response.json().get("message")
 
     for i_d in followed_users:
         snaps = await snaps_dao.get_from_user(user_id, limit, offset)
