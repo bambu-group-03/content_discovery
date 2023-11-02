@@ -1,4 +1,4 @@
-from typing import List, Union
+from typing import List, Optional, Union
 
 from fastapi import Depends
 from sqlalchemy import delete, select, update
@@ -29,6 +29,23 @@ class SnapDAO:
         self.session.add(snap)
         await self.session.flush()
         return snap
+
+    async def create_reply_snap(
+        self,
+        user_id: str,
+        content: str,
+        parent_id: str,
+    ) -> Optional[SnapsModel]:
+        """Add reply snap to session."""
+        try:
+            snap = SnapsModel(user_id=user_id, content=content, parent_id=parent_id)
+
+            self.session.add(snap)
+            await self.session.flush()
+
+            return snap
+        except Exception:
+            return None
 
     async def delete_snap(
         self,
