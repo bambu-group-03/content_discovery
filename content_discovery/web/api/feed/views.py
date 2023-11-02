@@ -79,17 +79,15 @@ async def get_snaps(
     # TEMP:
 
     # TEMP: dummy ping
-    print(f"{settings.identity_socializer_url}/api/echo/")
-    response = httpx.post(
-        f"{settings.identity_socializer_url}/api/echo/",
-        json={"message": f"This is a user: {str(user_id)}"},
-    )
+    url = f"{settings.identity_socializer_url}/api/auth/{user_id}/following"
+    print(url)
+    response = httpx.get(url)
     # TODO: parse response into a list of ids
-    followed_users = [user_id]
+    followed_users = response.json()
     # message = response.json().get("message")
 
-    for i_d in followed_users:
-        snaps = await snaps_dao.get_from_user(user_id, limit, offset)
+    for user in followed_users:
+        snaps = await snaps_dao.get_from_user(user["id"], limit, offset)
         for a_snap in iter(snaps):
             created_at = a_snap.created_at
             print(created_at.__class__)
