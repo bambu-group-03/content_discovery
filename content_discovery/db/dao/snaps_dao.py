@@ -8,6 +8,7 @@ from content_discovery.db.dependencies import get_db_session
 from content_discovery.db.models.fav_model import FavModel
 from content_discovery.db.models.hashtag_model import HashtagModel
 from content_discovery.db.models.like_model import LikeModel
+from content_discovery.db.models.mention_model import MentionModel
 from content_discovery.db.models.share_model import ShareModel
 from content_discovery.db.models.snaps_model import SnapsModel
 from content_discovery.db.utils import is_valid_uuid
@@ -72,6 +73,9 @@ class SnapDAO:
         # Delete snap hashtags
         await self.delete_snap_hashtags(snap_id)
 
+        # Delete snap mentions
+        await self.delete_snap_mentions(snap_id)
+
         query = delete(SnapsModel).where(SnapsModel.id == snap_id)
         await self.session.execute(query)
 
@@ -105,6 +109,14 @@ class SnapDAO:
     ) -> None:
         """Delete specific snap hashtags."""
         query = delete(HashtagModel).where(HashtagModel.snap_id == snap_id)
+        await self.session.execute(query)
+
+    async def delete_snap_mentions(
+        self,
+        snap_id: str,
+    ) -> None:
+        """Delete specific snap mentions."""
+        query = delete(MentionModel).where(MentionModel.snap_id == snap_id)
         await self.session.execute(query)
 
     async def get_all_snaps(self, limit: int, offset: int) -> List[SnapsModel]:
