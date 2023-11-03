@@ -124,3 +124,23 @@ async def unfav_snap(
 
     # Decrease favs from snap
     await snap_dao.decrease_favs(snap_id)
+
+
+@router.post("/{user_id}/set_public/{snap_id}")
+async def make_snap_public(
+    user_id: str,
+    snap_id: str,
+    snap_dao: SnapDAO = Depends(),
+) -> None:
+    """User makes a snap public."""
+    await snap_dao.make_public(snap_id)
+
+
+@router.post("/{user_id}/set_private/{snap_id}")
+async def make_snap_private(
+    user_id: str,
+    snap_id: str,
+    snap_dao: SnapDAO = Depends(),
+) -> None:
+    """User makes a snap private."""
+    await snap_dao.make_private(snap_id)

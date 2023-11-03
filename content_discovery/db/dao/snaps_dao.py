@@ -4,6 +4,7 @@ from fastapi import Depends
 from sqlalchemy import delete, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from content_discovery.constants import Visibility
 from content_discovery.db.dependencies import get_db_session
 from content_discovery.db.models.fav_model import FavModel
 from content_discovery.db.models.like_model import LikeModel
@@ -225,6 +226,36 @@ class SnapDAO:
             .where(SnapsModel.id == snap_id)
             .values(
                 favs=SnapsModel.favs - 1,
+            )
+        )
+
+        await self.session.execute(stmt)
+
+    async def make_public(
+        self,
+        snap_id: str,
+    ) -> None:
+        """Set visibility to public"""
+        stmt = (
+            update(SnapsModel)
+            .where(SnapsModel.id == snap_id)
+            .values(
+                visibility=Visibility.PUBLIC.value,
+            )
+        )
+
+        await self.session.execute(stmt)
+
+    async def make_private(
+        self,
+        snap_id: str,
+    ) -> None:
+        """Set visibility to private"""
+        stmt = (
+            update(SnapsModel)
+            .where(SnapsModel.id == snap_id)
+            .values(
+                visibility=Visibility.PRIVATE.value,
             )
         )
 
