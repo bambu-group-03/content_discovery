@@ -8,7 +8,13 @@ from sqlalchemy import inspect
 from content_discovery.db.dao.snaps_dao import SnapDAO
 from content_discovery.db.models.snaps_model import SnapsModel
 from content_discovery.settings import settings
-from content_discovery.web.api.feed.schema import FeedPack, PostSnap, Snap
+from content_discovery.web.api.feed.schema import (
+    FeedPack,
+    PostSnap,
+    ReplySnap,
+    Snap,
+    UpdateSnap,
+)
 
 router = APIRouter()
 
@@ -41,7 +47,7 @@ async def post_snap(
 
 @router.post("/reply", response_model=None)
 async def reply_snap(
-    incoming_message: PostSnap,
+    incoming_message: ReplySnap,
     snaps_dao: SnapDAO = Depends(),
 ) -> Optional[SnapsModel]:
     """Create a reply snap with the received content."""
@@ -53,6 +59,15 @@ async def reply_snap(
         content=incoming_message.content,
         parent_id=incoming_message.parent_id,
     )
+
+
+@router.put("/update_snap")
+async def update_snap(
+    body: UpdateSnap,
+    snaps_dao: SnapDAO = Depends(),
+) -> None:
+    """Updates a snap."""
+    await snaps_dao.update_snap(body.user_id, body.snap_id, body.content)
 
 
 @router.delete("/snap/{snap_id}")
