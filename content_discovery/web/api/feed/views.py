@@ -1,4 +1,4 @@
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 import httpx
 from fastapi import APIRouter, HTTPException
@@ -96,26 +96,26 @@ async def get_snaps(
 ) -> FeedPack:
     """Returns a list of snap ids."""
     my_snaps = []
+    users = [user["id"] for user in _followed_users(user_id)]
     # TODO: parse response into a list of ids
 
-    for user in httpx.get(_url_get_following(user_id)).json():
-        snaps = await snaps_dao.get_from_user(user["id"], limit, offset)
-        for a_snap in iter(snaps):
-            created_at = a_snap.created_at
-            print(created_at.__class__)
-            my_snaps.append(
-                Snap(
-                    id=a_snap.id,
-                    author=str(a_snap.user_id),
-                    content=a_snap.content,
-                    likes=a_snap.likes,
-                    shares=a_snap.shares,
-                    favs=a_snap.favs,
-                    created_at=created_at,
-                    parent_id=a_snap.parent_id,
-                    visibility=a_snap.visibility,
-                ),
-            )
+    snaps = await snaps_dao.get_from_users(users, limit, offset)
+    for a_snap in iter(snaps):
+        created_at = a_snap.created_at
+        print(created_at.__class__)
+        my_snaps.append(
+            Snap(
+                id=a_snap.id,
+                author=str(a_snap.user_id),
+                content=a_snap.content,
+                likes=a_snap.likes,
+                shares=a_snap.shares,
+                favs=a_snap.favs,
+                created_at=created_at,
+                parent_id=a_snap.parent_id,
+                visibility=a_snap.visibility,
+            ),
+        )
     return FeedPack(snaps=my_snaps)
 
 
@@ -150,6 +150,10 @@ async def get_snaps_from_user(
             ),
         )
     return FeedPack(snaps=my_snaps)
+
+
+def _followed_users(user_id: str) -> List[Dict[str, str]]:
+    return httpx.get(_url_get_following(user_id)).json()
 
 
 def _url_get_following(user_id: str) -> str:
