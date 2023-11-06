@@ -5,10 +5,12 @@ from fastapi import APIRouter, HTTPException
 from fastapi.param_functions import Depends
 from sqlalchemy import inspect
 
+from content_discovery.db.dao.hashtag_dao import HashtagDAO
+from content_discovery.db.dao.mention_dao import MentionDAO
 from content_discovery.db.dao.snaps_dao import SnapDAO
 from content_discovery.db.models.snaps_model import SnapsModel
 from content_discovery.settings import settings
-from content_discovery.web.api.feed.schema import FeedPack, PostSnap, Snap
+from content_discovery.web.api.feed.schema import FeedPack, PostReply, PostSnap, Snap
 
 router = APIRouter()
 
@@ -19,12 +21,18 @@ NON_EXISTENT = 405
 async def post_snap(
     incoming_message: PostSnap,
     snaps_dao: SnapDAO = Depends(),
+    hashtag_dao: HashtagDAO = Depends(),
+    mention_dao: MentionDAO = Depends(),
 ) -> Snap:
     """Uploads a snap with the received content."""
     snap = await snaps_dao.create_snaps_model(
         user_id=incoming_message.user_id,
         content=incoming_message.content,
     )
+
+    await hashtag_dao.create_hashtags(snap.id, snap.content)
+    await mention_dao.create_mentions(snap.id, snap.content)
+
     insp = inspect(snap)
     i_d = insp.attrs.id.value
     return Snap(
@@ -42,18 +50,29 @@ async def post_snap(
 
 @router.post("/reply", response_model=None)
 async def reply_snap(
-    incoming_message: PostSnap,
+    incoming_message: PostReply,
     snaps_dao: SnapDAO = Depends(),
+    hashtag_dao: HashtagDAO = Depends(),
+    mention_dao: MentionDAO = Depends(),
 ) -> Optional[SnapsModel]:
     """Create a reply snap with the received content."""
     if not incoming_message.parent_id:
         return None
 
-    return await snaps_dao.create_reply_snap(
+    reply = await snaps_dao.create_reply_snap(
         user_id=incoming_message.user_id,
         content=incoming_message.content,
         parent_id=incoming_message.parent_id,
     )
+
+    if not reply:
+        return None
+
+    # Create hashtags and mentions
+    await hashtag_dao.create_hashtags(reply.id, reply.content)
+    await mention_dao.create_mentions(reply.id, reply.content)
+
+    return reply
 
 
 @router.delete("/snap/{snap_id}")
