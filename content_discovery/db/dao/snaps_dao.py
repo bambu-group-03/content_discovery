@@ -162,6 +162,7 @@ class SnapDAO:
         print(users)
         query = select(SnapsModel)
         query = query.where(SnapsModel.user_id.in_(users))
+        query = query.order_by(SnapsModel.created_at.desc())
         query = query.limit(limit).offset(offset)
         print(query)
         rows = await self.session.execute(query)
