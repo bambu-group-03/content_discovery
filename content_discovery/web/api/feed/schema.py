@@ -17,6 +17,7 @@ class Snap(BaseModel):
     created_at: datetime
     username: Optional[str]
     parent_id: Optional[uuid.UUID]
+    visibility: int
 
 
 class FeedPack(BaseModel):

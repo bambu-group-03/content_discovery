@@ -5,6 +5,7 @@ from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql.sqltypes import DateTime, Integer, String, Uuid
 
+from content_discovery.constants import Visibility
 from content_discovery.db.base import Base
 
 
@@ -34,5 +35,7 @@ class SnapsModel(Base):
         DateTime,
         default=datetime.datetime.utcnow,
     )
+
+    visibility: Mapped[int] = mapped_column(Integer, default=Visibility.PUBLIC.value)
 
     snap = relationship("SnapsModel", foreign_keys=[parent_id])
