@@ -1,4 +1,4 @@
-from typing import Any, Dict, List, Optional
+from typing import Dict, List, Optional
 
 import httpx
 from fastapi import APIRouter, HTTPException
@@ -180,42 +180,6 @@ async def get_snaps_from_user(
 
 def _followed_users(user_id: str) -> List[Dict[str, str]]:
     return httpx.get(_url_get_following(user_id)).json()
-
-
-async def _get_snaps_from_users(
-    following: Any,
-    snaps_dao: SnapDAO,
-    limit: int,
-    offset: int,
-) -> Optional[list[Snap]]:
-    my_snaps: List[Snap] = []
-    for user in following:
-        snaps = await snaps_dao.get_from_user(user["id"], limit, offset)
-        for a_snap in iter(snaps):
-            created_at = a_snap.created_at
-            print(created_at.__class__)
-            my_snaps.append(
-                Snap(
-                    id=a_snap.id,
-                    author=str(a_snap.user_id),
-                    content=a_snap.content,
-                    likes=a_snap.likes,
-                    shares=a_snap.shares,
-                    favs=a_snap.favs,
-                    created_at=created_at,
-                    username=user["username"],
-                    parent_id=a_snap.parent_id,
-                    visibility=a_snap.visibility,
-                ),
-            )
-    return my_snaps
-
-
-def _users_followed_by(user_id: str) -> list[Any]:
-    response = httpx.get(_url_get_following(user_id))
-    if response.status_code != OK:
-        raise ValueError("Bad request to id socializer", str(response))
-    return response.json()
 
 
 def _url_get_following(user_id: str) -> str:
