@@ -15,6 +15,7 @@ class Snap(BaseModel):
     shares: int
     favs: int
     created_at: datetime
+    username: Optional[str]
     parent_id: Optional[uuid.UUID]
 
 
