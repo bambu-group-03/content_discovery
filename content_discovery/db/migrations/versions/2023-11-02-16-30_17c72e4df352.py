@@ -15,7 +15,7 @@ depends_on = None
 
 
 def upgrade() -> None:
-    op.execute("UPDATE snaps SET visibility = 0")
+    op.execute("UPDATE snaps SET visibility = 1")
     # ### end Alembic commands ###
 
 
