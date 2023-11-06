@@ -1,4 +1,4 @@
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 import httpx
 from fastapi import APIRouter, HTTPException
@@ -15,6 +15,7 @@ from content_discovery.web.api.feed.schema import FeedPack, PostReply, PostSnap,
 router = APIRouter()
 
 NON_EXISTENT = 405
+OK = 200
 
 
 @router.post("/post")
@@ -43,6 +44,7 @@ async def post_snap(
         shares=insp.attrs.shares.value,
         favs=insp.attrs.favs.value,
         created_at=insp.attrs.created_at.value,
+        username=None,
         parent_id=insp.attrs.parent_id.value,
         visibility=insp.attrs.visibility.value,
     )
@@ -92,6 +94,7 @@ async def get_snap(
     """Gets a snap."""
     snap = await snaps_dao.get_snap_from_id(snap_id)
     if snap:
+        user = httpx.get(_url_get_user(snap.user_id)).json()
         return Snap(
             id=snap.id,
             author=str(snap.user_id),
@@ -100,6 +103,7 @@ async def get_snap(
             shares=snap.shares,
             favs=snap.favs,
             created_at=snap.created_at,
+            username=user["username"],
             parent_id=snap.parent_id,
             visibility=snap.visibility,
         )
@@ -120,8 +124,7 @@ async def get_snaps(
 
     snaps = await snaps_dao.get_from_users(users, limit, offset)
     for a_snap in iter(snaps):
-        created_at = a_snap.created_at
-        print(created_at.__class__)
+        an_author = _get_username(user_id)
         my_snaps.append(
             Snap(
                 id=a_snap.id,
@@ -130,11 +133,13 @@ async def get_snaps(
                 likes=a_snap.likes,
                 shares=a_snap.shares,
                 favs=a_snap.favs,
-                created_at=created_at,
+                created_at=a_snap.created_at,
                 parent_id=a_snap.parent_id,
+                username=an_author,
                 visibility=a_snap.visibility,
             ),
         )
+
     return FeedPack(snaps=my_snaps)
 
 
@@ -155,15 +160,17 @@ async def get_snaps_from_user(
     snaps = await snaps_dao.get_from_user(user_id, limit, offset)
     for a_snap in iter(snaps):
         created_at = a_snap.created_at
+        an_author = _get_username(user_id)
         my_snaps.append(
             Snap(
                 id=a_snap.id,
-                author=str(a_snap.user_id),
+                author=a_snap.user_id,
                 content=a_snap.content,
                 likes=a_snap.likes,
                 shares=a_snap.shares,
                 favs=a_snap.favs,
                 created_at=created_at,
+                username=an_author,
                 parent_id=a_snap.parent_id,
                 visibility=a_snap.visibility,
             ),
@@ -175,8 +182,55 @@ def _followed_users(user_id: str) -> List[Dict[str, str]]:
     return httpx.get(_url_get_following(user_id)).json()
 
 
+async def _get_snaps_from_users(
+    following: Any,
+    snaps_dao: SnapDAO,
+    limit: int,
+    offset: int,
+) -> Optional[list[Snap]]:
+    my_snaps: List[Snap] = []
+    for user in following:
+        snaps = await snaps_dao.get_from_user(user["id"], limit, offset)
+        for a_snap in iter(snaps):
+            created_at = a_snap.created_at
+            print(created_at.__class__)
+            my_snaps.append(
+                Snap(
+                    id=a_snap.id,
+                    author=str(a_snap.user_id),
+                    content=a_snap.content,
+                    likes=a_snap.likes,
+                    shares=a_snap.shares,
+                    favs=a_snap.favs,
+                    created_at=created_at,
+                    username=user["username"],
+                    parent_id=a_snap.parent_id,
+                    visibility=a_snap.visibility,
+                ),
+            )
+    return my_snaps
+
+
+def _users_followed_by(user_id: str) -> list[Any]:
+    response = httpx.get(_url_get_following(user_id))
+    if response.status_code != OK:
+        raise ValueError("Bad request to id socializer", str(response))
+    return response.json()
+
+
 def _url_get_following(user_id: str) -> str:
     return f"{settings.identity_socializer_url}/api/auth/{user_id}/following"
+
+
+def _get_username(user_id: str) -> str:
+    author = httpx.get(_url_get_user(user_id)).json()
+    if not author:
+        return author
+    return author["username"]
+
+
+def _url_get_user(user_id: str) -> str:
+    return f"{settings.identity_socializer_url}/api/auth/users/{user_id}"
 
 
 @router.get("/get_all_snaps", response_model=None)
