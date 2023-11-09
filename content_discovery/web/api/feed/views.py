@@ -106,6 +106,7 @@ async def get_snap(
             username=user["username"],
             parent_id=snap.parent_id,
             visibility=snap.visibility,
+            has_shared=False,
         )
     raise HTTPException(status_code=NON_EXISTENT, detail="That tweet doesnt exist")
 
@@ -137,6 +138,7 @@ async def get_snaps(
                 parent_id=a_snap.parent_id,
                 username=an_author,
                 visibility=a_snap.visibility,
+                has_shared=False,
             ),
         )
 
@@ -154,6 +156,8 @@ async def get_snaps_and_shares(
     snaps = await snaps_dao.get_snaps_and_shares(user_id, limit, offset)
     my_snaps = []
     for a_snap in iter(snaps):
+        user_has_shared = await snaps_dao.user_has_shared(user_id, a_snap.id)
+        print(user_has_shared)
         an_author = _get_username(a_snap.user_id)
         my_snaps.append(
             Snap(
@@ -167,6 +171,7 @@ async def get_snaps_and_shares(
                 parent_id=a_snap.parent_id,
                 username=an_author,
                 visibility=a_snap.visibility,
+                has_shared=user_has_shared,
             ),
         )
     return FeedPack(snaps=my_snaps)
@@ -202,6 +207,7 @@ async def get_snaps_from_user(
                 username=an_author,
                 parent_id=a_snap.parent_id,
                 visibility=a_snap.visibility,
+                has_shared=False,
             ),
         )
     return FeedPack(snaps=my_snaps)
