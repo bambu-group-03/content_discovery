@@ -124,7 +124,7 @@ async def get_snaps(
 
     snaps = await snaps_dao.get_from_users(users, limit, offset)
     for a_snap in iter(snaps):
-        an_author = _get_username(user_id)
+        an_author = _get_username(a_snap.user_id)
         my_snaps.append(
             Snap(
                 id=a_snap.id,
@@ -154,6 +154,7 @@ async def get_snaps_and_shares(
     snaps = await snaps_dao.get_snaps_and_shares()
     my_snaps = []
     for a_snap in iter(snaps):
+        an_author = _get_username(a_snap.user_id)
         my_snaps.append(
             Snap(
                 id=a_snap.id,
@@ -164,7 +165,7 @@ async def get_snaps_and_shares(
                 favs=a_snap.favs,
                 created_at=a_snap.created_at,
                 parent_id=a_snap.parent_id,
-                username="???",
+                username=an_author,
                 visibility=a_snap.visibility,
             ),
         )
@@ -215,10 +216,12 @@ def _url_get_following(user_id: str) -> str:
 
 
 def _get_username(user_id: str) -> str:
-    author = httpx.get(_url_get_user(user_id)).json()
-    if not author:
-        return author
-    return author["username"]
+    try:
+        author = httpx.get(_url_get_user(user_id)).json()
+        return author["username"]
+    except Exception:
+        print("username error")
+        return "jack"
 
 
 def _url_get_user(user_id: str) -> str:
