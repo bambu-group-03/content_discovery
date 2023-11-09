@@ -121,6 +121,7 @@ async def get_snap(
             username=user["username"],
             parent_id=snap.parent_id,
             visibility=snap.visibility,
+            has_shared=False,
         )
     raise HTTPException(status_code=NON_EXISTENT, detail="That tweet doesnt exist")
 
@@ -139,7 +140,38 @@ async def get_snaps(
 
     snaps = await snaps_dao.get_from_users(users, limit, offset)
     for a_snap in iter(snaps):
-        an_author = _get_username(user_id)
+        my_snaps.append(
+            Snap(
+                id=a_snap.id,
+                author=str(a_snap.user_id),
+                content=a_snap.content,
+                likes=a_snap.likes,
+                shares=a_snap.shares,
+                favs=a_snap.favs,
+                created_at=a_snap.created_at,
+                parent_id=a_snap.parent_id,
+                username=_get_username(a_snap.user_id),
+                visibility=a_snap.visibility,
+                has_shared=await snaps_dao.user_has_shared(user_id, a_snap.id),
+            ),
+        )
+
+    return FeedPack(snaps=my_snaps)
+
+
+@router.get("/snaps_and_shares")
+async def get_snaps_and_shares(
+    user_id: str,
+    limit: int = 10,
+    offset: int = 0,
+    snaps_dao: SnapDAO = Depends(),
+) -> FeedPack:
+    """Returns a list of snaps and snapshares."""
+    snaps = await snaps_dao.get_snaps_and_shares(user_id, limit, offset)
+    my_snaps = []
+    for a_snap in iter(snaps):
+        user_has_shared = await snaps_dao.user_has_shared(user_id, a_snap.id)
+        an_author = _get_username(a_snap.user_id)
         my_snaps.append(
             Snap(
                 id=a_snap.id,
@@ -152,9 +184,9 @@ async def get_snaps(
                 parent_id=a_snap.parent_id,
                 username=an_author,
                 visibility=a_snap.visibility,
+                has_shared=user_has_shared,
             ),
         )
-
     return FeedPack(snaps=my_snaps)
 
 
@@ -188,6 +220,7 @@ async def get_snaps_from_user(
                 username=an_author,
                 parent_id=a_snap.parent_id,
                 visibility=a_snap.visibility,
+                has_shared=False,
             ),
         )
     return FeedPack(snaps=my_snaps)
@@ -202,10 +235,12 @@ def _url_get_following(user_id: str) -> str:
 
 
 def _get_username(user_id: str) -> str:
-    author = httpx.get(_url_get_user(user_id)).json()
-    if not author:
-        return author
-    return author["username"]
+    try:
+        author = httpx.get(_url_get_user(user_id)).json()
+        return author["username"]
+    except Exception:
+        print("username error")
+        return "jack"
 
 
 def _url_get_user(user_id: str) -> str:

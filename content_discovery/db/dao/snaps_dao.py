@@ -1,8 +1,10 @@
+import uuid
 from typing import List, Optional, Union
 
 from fastapi import Depends
-from sqlalchemy import delete, select, update
+from sqlalchemy import delete, or_, outerjoin, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.sql.functions import coalesce
 
 from content_discovery.constants import Visibility
 from content_discovery.db.dependencies import get_db_session
@@ -174,7 +176,7 @@ class SnapDAO:
         offset: int,
     ) -> list[SnapsModel]:
         """
-        Get specific snap model from user.
+        Get snaps from a set of users.
 
         :param user_id:
         :param limit: up to ho many snaps to get
@@ -339,3 +341,31 @@ class SnapDAO:
         rows = await self.session.execute(query)
 
         return list(rows.scalars().fetchall())
+
+    async def get_snaps_and_shares(
+        self,
+        user_id: str,
+        limit: int = 10,
+        offset: int = 0,
+    ) -> List[SnapsModel]:
+        """Get snaps shared by a user along with snaps written by a user"""
+        joined = outerjoin(SnapsModel, ShareModel, SnapsModel.id == ShareModel.snap_id)
+        selected = joined.select()
+        filter1 = selected.where(
+            or_(SnapsModel.user_id == user_id, ShareModel.user_id == user_id),
+        )
+        query = filter1.order_by(
+            coalesce(SnapsModel.created_at, ShareModel.created_at).desc(),
+        )
+        rows = await self.session.execute(query.limit(limit).offset(offset))
+        return list(rows.scalars().fetchall())
+
+    async def user_has_shared(self, user_id: str, snap_id: uuid.UUID) -> bool:
+        """Boolean whether user has shared the snap"""
+        query = select(ShareModel)
+        query = query.where(ShareModel.snap_id == snap_id).where(
+            ShareModel.user_id == user_id,
+        )
+        rows = await self.session.execute(query)
+        my_list = list(rows.scalars().fetchall())
+        return bool(my_list)
