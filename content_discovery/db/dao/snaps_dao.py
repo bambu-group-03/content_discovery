@@ -1,8 +1,9 @@
 from typing import List, Optional, Union
 
 from fastapi import Depends
-from sqlalchemy import delete, select, update
+from sqlalchemy import delete, outerjoin, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.sql.functions import coalesce
 
 from content_discovery.constants import Visibility
 from content_discovery.db.dependencies import get_db_session
@@ -317,4 +318,14 @@ class SnapDAO:
 
         rows = await self.session.execute(query)
 
+        return list(rows.scalars().fetchall())
+
+    async def get_snaps_and_shares(self) -> List[SnapsModel]:
+        """Get snaps and shares"""
+        joined = outerjoin(SnapsModel, ShareModel, SnapsModel.id == ShareModel.snap_id)
+        selected = joined.select()
+        query = selected.order_by(
+            coalesce(SnapsModel.created_at, ShareModel.created_at).desc(),
+        )
+        rows = await self.session.execute(query)
         return list(rows.scalars().fetchall())
