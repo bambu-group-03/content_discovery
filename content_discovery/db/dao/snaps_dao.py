@@ -1,7 +1,7 @@
 from typing import List, Optional, Union
 
 from fastapi import Depends
-from sqlalchemy import delete, outerjoin, select, update
+from sqlalchemy import delete, or_, outerjoin, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql.functions import coalesce
 
@@ -154,7 +154,7 @@ class SnapDAO:
         offset: int,
     ) -> list[SnapsModel]:
         """
-        Get specific snap model from user.
+        Get snaps from a set of users.
 
         :param user_id:
         :param limit: up to ho many snaps to get
@@ -320,12 +320,20 @@ class SnapDAO:
 
         return list(rows.scalars().fetchall())
 
-    async def get_snaps_and_shares(self) -> List[SnapsModel]:
-        """Get snaps and shares"""
+    async def get_snaps_and_shares(
+        self,
+        user_id: str,
+        limit: int = 10,
+        offset: int = 0,
+    ) -> List[SnapsModel]:
+        """Get snaps shared by a user along with snaps written by a user"""
         joined = outerjoin(SnapsModel, ShareModel, SnapsModel.id == ShareModel.snap_id)
         selected = joined.select()
-        query = selected.order_by(
+        filter1 = selected.where(
+            or_(SnapsModel.user_id == user_id, ShareModel.user_id == user_id),
+        )
+        query = filter1.order_by(
             coalesce(SnapsModel.created_at, ShareModel.created_at).desc(),
         )
-        rows = await self.session.execute(query)
+        rows = await self.session.execute(query.limit(limit).offset(offset))
         return list(rows.scalars().fetchall())

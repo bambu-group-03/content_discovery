@@ -151,7 +151,7 @@ async def get_snaps_and_shares(
     snaps_dao: SnapDAO = Depends(),
 ) -> FeedPack:
     """Returns a list of snaps and snapshares."""
-    snaps = await snaps_dao.get_snaps_and_shares()
+    snaps = await snaps_dao.get_snaps_and_shares(user_id, limit, offset)
     my_snaps = []
     for a_snap in iter(snaps):
         an_author = _get_username(a_snap.user_id)
