@@ -52,6 +52,27 @@ class SnapDAO:
         except Exception:
             return None
 
+    async def update_snap(
+        self,
+        user_id: str,
+        snap_id: str,
+        content: str,
+    ) -> None:
+        """Update single snap to session."""
+        if not is_valid_uuid(snap_id):
+            return
+
+        stmt = (
+            update(SnapsModel)
+            .where(SnapsModel.id == snap_id)
+            .where(SnapsModel.user_id == user_id)
+            .values(
+                content=content,
+            )
+        )
+
+        await self.session.execute(stmt)
+
     async def delete_snap(
         self,
         snap_id: str,

@@ -34,9 +34,17 @@ class PostSnap(BaseModel):
     content: str
 
 
-class PostReply(BaseModel):
+class ReplySnap(BaseModel):
     """Snap posted by user"""
 
     user_id: str
     parent_id: str
+    content: str
+
+
+class UpdateSnap(BaseModel):
+    """Snap posted by user"""
+
+    user_id: str
+    snap_id: str
     content: str
