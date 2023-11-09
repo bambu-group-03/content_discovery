@@ -125,7 +125,6 @@ async def get_snaps(
 
     snaps = await snaps_dao.get_from_users(users, limit, offset)
     for a_snap in iter(snaps):
-        an_author = _get_username(a_snap.user_id)
         my_snaps.append(
             Snap(
                 id=a_snap.id,
@@ -136,9 +135,9 @@ async def get_snaps(
                 favs=a_snap.favs,
                 created_at=a_snap.created_at,
                 parent_id=a_snap.parent_id,
-                username=an_author,
+                username=_get_username(a_snap.user_id),
                 visibility=a_snap.visibility,
-                has_shared=False,
+                has_shared=await snaps_dao.user_has_shared(user_id, a_snap.id),
             ),
         )
 
@@ -157,7 +156,6 @@ async def get_snaps_and_shares(
     my_snaps = []
     for a_snap in iter(snaps):
         user_has_shared = await snaps_dao.user_has_shared(user_id, a_snap.id)
-        print(user_has_shared)
         an_author = _get_username(a_snap.user_id)
         my_snaps.append(
             Snap(
