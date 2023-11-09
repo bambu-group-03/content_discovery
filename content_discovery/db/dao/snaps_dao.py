@@ -167,6 +167,28 @@ class SnapDAO:
         rows = await self.session.execute(query)
         return rows.scalars().first()
 
+    async def get_from_users(
+        self,
+        users: list[str],
+        limit: int,
+        offset: int,
+    ) -> list[SnapsModel]:
+        """
+        Get specific snap model from user.
+
+        :param user_id:
+        :param limit: up to ho many snaps to get
+        :param offset: from where to begin providing results
+        """
+        print(users)
+        query = select(SnapsModel)
+        query = query.where(SnapsModel.user_id.in_(users))
+        query = query.order_by(SnapsModel.created_at.desc())
+        query = query.limit(limit).offset(offset)
+        print(query)
+        rows = await self.session.execute(query)
+        return list(rows.scalars().fetchall())
+
     async def get_from_user(
         self,
         user_id: str,
