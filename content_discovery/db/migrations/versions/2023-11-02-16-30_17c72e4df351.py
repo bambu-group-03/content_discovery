@@ -1,4 +1,4 @@
-"""empty message
+"""Added visibility in snaps table
 
 Revision ID: 17c72e4df351
 Revises: def43c5d88af
