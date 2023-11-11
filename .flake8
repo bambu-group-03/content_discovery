@@ -13,6 +13,7 @@ ignore =
   ; Found `f` string
   WPS305,
   ; Missing docstring in public module
+  WPS210,
   D100,
   ; Missing docstring in magic method
   D105,

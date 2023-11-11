@@ -19,6 +19,7 @@ class Snap(BaseModel):
     parent_id: Optional[uuid.UUID]
     visibility: int
     has_shared: Optional[bool] = False
+    has_liked: Optional[bool] = False
 
 
 class FeedPack(BaseModel):

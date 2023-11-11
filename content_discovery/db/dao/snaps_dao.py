@@ -182,12 +182,11 @@ class SnapDAO:
         :param limit: up to ho many snaps to get
         :param offset: from where to begin providing results
         """
-        print(users)
         query = select(SnapsModel)
         query = query.where(SnapsModel.user_id.in_(users))
         query = query.order_by(SnapsModel.created_at.desc())
         query = query.limit(limit).offset(offset)
-        print(query)
+
         rows = await self.session.execute(query)
         return list(rows.scalars().fetchall())
 
@@ -368,4 +367,17 @@ class SnapDAO:
         )
         rows = await self.session.execute(query)
         my_list = list(rows.scalars().fetchall())
+        print(f"my_list shares: {my_list}")
+        return bool(my_list)
+
+    async def user_has_liked(self, user_id: str, snap_id: uuid.UUID) -> bool:
+        """Boolean whether user has liked the snap"""
+        query = select(LikeModel)
+        query = query.where(LikeModel.snap_id == snap_id).where(
+            LikeModel.user_id == user_id,
+        )
+
+        rows = await self.session.execute(query)
+        my_list = list(rows.scalars().fetchall())
+        print(f"my_list likes: {my_list}")
         return bool(my_list)

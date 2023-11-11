@@ -109,7 +109,8 @@ async def get_snap(
     """Gets a snap."""
     snap = await snaps_dao.get_snap_from_id(snap_id)
     if snap:
-        user = httpx.get(_url_get_user(snap.user_id)).json()
+        username = _get_username(snap.user_id)
+
         return Snap(
             id=snap.id,
             author=str(snap.user_id),
@@ -118,10 +119,9 @@ async def get_snap(
             shares=snap.shares,
             favs=snap.favs,
             created_at=snap.created_at,
-            username=user["username"],
+            username=username,
             parent_id=snap.parent_id,
             visibility=snap.visibility,
-            has_shared=False,
         )
     raise HTTPException(status_code=NON_EXISTENT, detail="That tweet doesnt exist")
 
@@ -136,10 +136,14 @@ async def get_snaps(
     """Returns a list of snap ids."""
     my_snaps = []
     users = [user["id"] for user in _followed_users(user_id)]
-    # TODO: parse response into a list of ids
+    users.append(user_id)
 
     snaps = await snaps_dao.get_from_users(users, limit, offset)
-    for a_snap in iter(snaps):
+    for a_snap in snaps:
+
+        has_shared = await snaps_dao.user_has_shared(user_id, a_snap.id)
+        has_liked = await snaps_dao.user_has_liked(user_id, a_snap.id)
+
         my_snaps.append(
             Snap(
                 id=a_snap.id,
@@ -152,7 +156,8 @@ async def get_snaps(
                 parent_id=a_snap.parent_id,
                 username=_get_username(a_snap.user_id),
                 visibility=a_snap.visibility,
-                has_shared=await snaps_dao.user_has_shared(user_id, a_snap.id),
+                has_shared=has_shared,
+                has_liked=has_liked,
             ),
         )
 
@@ -170,8 +175,11 @@ async def get_snaps_and_shares(
     snaps = await snaps_dao.get_snaps_and_shares(user_id, limit, offset)
     my_snaps = []
     for a_snap in iter(snaps):
-        user_has_shared = await snaps_dao.user_has_shared(user_id, a_snap.id)
         an_author = _get_username(a_snap.user_id)
+
+        user_has_shared = await snaps_dao.user_has_shared(user_id, a_snap.id)
+        user_has_liked = await snaps_dao.user_has_liked(user_id, a_snap.id)
+
         my_snaps.append(
             Snap(
                 id=a_snap.id,
@@ -185,6 +193,7 @@ async def get_snaps_and_shares(
                 username=an_author,
                 visibility=a_snap.visibility,
                 has_shared=user_has_shared,
+                has_liked=user_has_liked,
             ),
         )
     return FeedPack(snaps=my_snaps)
@@ -220,7 +229,6 @@ async def get_snaps_from_user(
                 username=an_author,
                 parent_id=a_snap.parent_id,
                 visibility=a_snap.visibility,
-                has_shared=False,
             ),
         )
     return FeedPack(snaps=my_snaps)
@@ -239,8 +247,7 @@ def _get_username(user_id: str) -> str:
         author = httpx.get(_url_get_user(user_id)).json()
         return author["username"]
     except Exception:
-        print("username error")
-        return "jack"
+        return "Unknown"
 
 
 def _url_get_user(user_id: str) -> str:
