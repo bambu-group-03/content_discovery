@@ -1,4 +1,5 @@
-from typing import Optional
+import uuid
+from typing import List, Optional
 
 from fastapi import Depends
 from sqlalchemy import delete, select
@@ -33,13 +34,11 @@ class ShareDAO:
 
     async def delete_share_model(
         self,
-        user_id: str,
-        snap_id: str,
+        share_id: uuid.UUID,
     ) -> None:
         """Delete single share from session."""
         query = delete(ShareModel).where(
-            ShareModel.user_id == user_id,
-            ShareModel.snap_id == snap_id,
+            ShareModel.id == share_id,
         )
         await self.session.execute(query)
 
@@ -47,14 +46,15 @@ class ShareDAO:
         self,
         user_id: str,
         snap_id: str,
-    ) -> Optional[ShareModel]:
+    ) -> List[ShareModel]:
         """Get single share from session."""
         if not is_valid_uuid(snap_id):
-            return None
+            return []
 
-        query = select(ShareModel).where(
-            ShareModel.user_id == user_id,
-            ShareModel.snap_id == snap_id,
-        )
-        result = await self.session.execute(query)
-        return result.scalar_one_or_none()
+        query = select(ShareModel)
+        query = query.where(ShareModel.user_id == user_id)
+        query = query.where(ShareModel.snap_id == snap_id)
+
+        raw_shares = await self.session.execute(query)
+
+        return list(raw_shares.scalars().fetchall())
