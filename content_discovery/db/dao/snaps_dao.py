@@ -367,7 +367,7 @@ class SnapDAO:
         )
         rows = await self.session.execute(query)
         my_list = list(rows.scalars().fetchall())
-        print(f"my_list shares: {my_list}")
+
         return bool(my_list)
 
     async def user_has_liked(self, user_id: str, snap_id: uuid.UUID) -> bool:
@@ -379,5 +379,5 @@ class SnapDAO:
 
         rows = await self.session.execute(query)
         my_list = list(rows.scalars().fetchall())
-        print(f"my_list likes: {my_list}")
+
         return bool(my_list)
