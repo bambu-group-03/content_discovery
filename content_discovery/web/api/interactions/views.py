@@ -75,14 +75,13 @@ async def unshare_snap(
 ) -> None:
     """User unshare a snap."""
     # Check if share exists
-    shares = await share_dao.get_share_model(user_id, snap_id)
+    share = await share_dao.get_share_model(user_id, snap_id)
 
-    if not shares:
+    if not share:
         return
 
     # Delete share from db // TODO fix this
-    for share in shares:
-        await share_dao.delete_share_model(share.id)
+    await share_dao.delete_share_model(user_id, snap_id)
 
     # Decrease shares from snap
     await snap_dao.decrease_shares(snap_id)
