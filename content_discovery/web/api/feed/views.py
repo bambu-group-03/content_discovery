@@ -139,7 +139,7 @@ async def get_snaps(
     users.append(user_id)
 
     snaps = await snaps_dao.get_from_users(users, limit, offset)
-    for a_snap in snaps:
+    for a_snap in iter(snaps):
 
         has_shared = await snaps_dao.user_has_shared(user_id, a_snap.id)
         has_liked = await snaps_dao.user_has_liked(user_id, a_snap.id)
