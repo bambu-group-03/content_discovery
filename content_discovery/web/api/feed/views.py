@@ -139,7 +139,7 @@ async def get_snaps(
     users.append(user_id)
 
     snaps = await snaps_dao.get_from_users(users, limit, offset)
-    for a_snap in iter(snaps):
+    for a_snap in snaps:
 
         has_shared = await snaps_dao.user_has_shared(user_id, a_snap.id)
         has_liked = await snaps_dao.user_has_liked(user_id, a_snap.id)
@@ -239,7 +239,7 @@ def _followed_users(user_id: str) -> List[Dict[str, str]]:
 
 
 def _url_get_following(user_id: str) -> str:
-    return f"{settings.identity_socializer_url}/api/auth/{user_id}/following"
+    return f"{settings.identity_socializer_url}/api/interactions/{user_id}/following"
 
 
 def _get_username(user_id: str) -> str:
