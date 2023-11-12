@@ -144,12 +144,3 @@ async def make_snap_private(
 ) -> None:
     """User makes a snap private."""
     await snap_dao.make_private(snap_id)
-
-
-@router.get("/{snap_id}/count_replies", response_model=None)
-async def count_replies_by_snap_id(
-    snap_id: str,
-    snap_dao: SnapDAO = Depends(),
-) -> int:
-    """Get number of followers of user_id."""
-    return await snap_dao.count_replies_by_snap(snap_id)

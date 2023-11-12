@@ -111,6 +111,7 @@ async def get_snap(
     snap = await snaps_dao.get_snap_from_id(snap_id)
     if snap:
         (username, fullname) = get_user_info(snap.user_id)
+        num_replies = await snaps_dao.count_replies_by_snap(snap.id)
 
         return Snap(
             id=snap.id,
@@ -124,6 +125,7 @@ async def get_snap(
             fullname=fullname,
             parent_id=snap.parent_id,
             visibility=snap.visibility,
+            num_replies=num_replies,
         )
     raise HTTPException(status_code=NON_EXISTENT, detail="That tweet doesnt exist")
 
@@ -147,6 +149,7 @@ async def get_snaps(
         has_liked = await snaps_dao.user_has_liked(user_id, a_snap.id)
 
         (username, fullname) = get_user_info(a_snap.user_id)
+        num_replies = await snaps_dao.count_replies_by_snap(a_snap.id)
 
         my_snaps.append(
             Snap(
@@ -163,6 +166,7 @@ async def get_snaps(
                 visibility=a_snap.visibility,
                 has_shared=has_shared,
                 has_liked=has_liked,
+                num_replies=num_replies,
             ),
         )
 
@@ -184,6 +188,7 @@ async def get_snaps_and_shares(
 
         user_has_shared = await snaps_dao.user_has_shared(user_id, a_snap.id)
         user_has_liked = await snaps_dao.user_has_liked(user_id, a_snap.id)
+        num_replies = await snaps_dao.count_replies_by_snap(a_snap.id)
 
         my_snaps.append(
             Snap(
@@ -200,6 +205,7 @@ async def get_snaps_and_shares(
                 visibility=a_snap.visibility,
                 has_shared=user_has_shared,
                 has_liked=user_has_liked,
+                num_replies=num_replies,
             ),
         )
     return FeedPack(snaps=my_snaps)
@@ -223,6 +229,8 @@ async def get_snaps_from_user(
     for a_snap in iter(snaps):
         created_at = a_snap.created_at
         (username, fullname) = get_user_info(a_snap.user_id)
+        num_replies = await snaps_dao.count_replies_by_snap(a_snap.id)
+
         my_snaps.append(
             Snap(
                 id=a_snap.id,
@@ -236,6 +244,7 @@ async def get_snaps_from_user(
                 fullname=fullname,
                 parent_id=a_snap.parent_id,
                 visibility=a_snap.visibility,
+                num_replies=num_replies,
             ),
         )
     return FeedPack(snaps=my_snaps)
@@ -293,6 +302,7 @@ async def get_snap_replies(
 
         has_shared = await snaps_dao.user_has_shared(user_id, snap.id)
         has_liked = await snaps_dao.user_has_liked(user_id, snap.id)
+        num_replies = await snaps_dao.count_replies_by_snap(snap.id)
 
         (username, fullname) = get_user_info(snap.user_id)
 
@@ -311,6 +321,7 @@ async def get_snap_replies(
                 visibility=snap.visibility,
                 has_shared=has_shared,
                 has_liked=has_liked,
+                num_replies=num_replies,
             ),
         )
 

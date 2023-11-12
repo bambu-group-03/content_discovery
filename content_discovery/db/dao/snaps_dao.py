@@ -1,5 +1,5 @@
 import uuid
-from typing import List, Optional, Union
+from typing import Any, List, Optional, Union
 
 from fastapi import Depends
 from sqlalchemy import delete, or_, outerjoin, select, update
@@ -393,11 +393,8 @@ class SnapDAO:
 
         return list(rows.scalars().fetchall())
 
-    async def count_replies_by_snap(self, snap_id: str) -> int:
+    async def count_replies_by_snap(self, snap_id: Any) -> int:
         """Get number of replies of snap_id"""
-        if not is_valid_uuid(snap_id):
-            return 0
-
         replies = await self.get_snap_replies(snap_id)
 
         return len(replies)

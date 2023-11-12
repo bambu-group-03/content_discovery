@@ -21,6 +21,7 @@ class Snap(BaseModel):
     visibility: int
     has_shared: Optional[bool] = False
     has_liked: Optional[bool] = False
+    num_replies: Optional[int] = 0
 
 
 class FeedPack(BaseModel):
