@@ -275,3 +275,42 @@ async def get_all_snaps(
 ) -> List[SnapsModel]:
     """Returns a list of snaps"""
     return await snaps_dao.get_all_snaps(limit=limit, offset=offset)
+
+
+@router.get("/get_replies")
+async def get_snap_replies(
+    snap_id: str,
+    user_id: str,
+    snaps_dao: SnapDAO = Depends(),
+) -> FeedPack:
+    """Returns a list of snap ids."""
+    my_snaps = []
+
+    snaps = await snaps_dao.get_snap_replies(snap_id)
+
+    for snap in snaps:
+
+        has_shared = await snaps_dao.user_has_shared(user_id, snap.id)
+        has_liked = await snaps_dao.user_has_liked(user_id, snap.id)
+
+        (username, fullname) = _get_user_info(snap.user_id)
+
+        my_snaps.append(
+            Snap(
+                id=snap.id,
+                author=str(snap.user_id),
+                content=snap.content,
+                likes=snap.likes,
+                shares=snap.shares,
+                favs=snap.favs,
+                created_at=snap.created_at,
+                parent_id=snap.parent_id,
+                username=username,
+                fullname=fullname,
+                visibility=snap.visibility,
+                has_shared=has_shared,
+                has_liked=has_liked,
+            ),
+        )
+
+    return FeedPack(snaps=my_snaps)

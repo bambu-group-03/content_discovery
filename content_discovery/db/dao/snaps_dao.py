@@ -381,3 +381,14 @@ class SnapDAO:
         my_list = list(rows.scalars().fetchall())
 
         return bool(my_list)
+
+    async def get_snap_replies(self, snap_id: str) -> List[SnapsModel]:
+        """Get replies to a snap"""
+        if not is_valid_uuid(snap_id):
+            return []
+
+        query = select(SnapsModel)
+        query = query.where(SnapsModel.parent_id == snap_id)
+        rows = await self.session.execute(query)
+
+        return list(rows.scalars().fetchall())
