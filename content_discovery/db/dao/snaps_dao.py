@@ -392,3 +392,12 @@ class SnapDAO:
         rows = await self.session.execute(query)
 
         return list(rows.scalars().fetchall())
+
+    async def count_replies_by_snap(self, snap_id: str) -> int:
+        """Get number of replies of snap_id"""
+        if not is_valid_uuid(snap_id):
+            return 0
+
+        replies = await self.get_snap_replies(snap_id)
+
+        return len(replies)
