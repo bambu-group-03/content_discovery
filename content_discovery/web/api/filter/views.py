@@ -25,7 +25,7 @@ async def filter_hashtags(
         has_shared = await snaps_dao.user_has_shared(user_id, snap.id)
         has_liked = await snaps_dao.user_has_liked(user_id, snap.id)
 
-        (username, fullname) = get_user_info(snap.user_id)
+        (username, fullname, url) = get_user_info(snap.user_id)
 
         my_snaps.append(
             Snap(
@@ -42,6 +42,7 @@ async def filter_hashtags(
                 visibility=snap.visibility,
                 has_shared=has_shared,
                 has_liked=has_liked,
+                profile_photo_url=url,
             ),
         )
 
@@ -64,7 +65,7 @@ async def filter_snaps(
         has_shared = await snaps_dao.user_has_shared(user_id, snap.id)
         has_liked = await snaps_dao.user_has_liked(user_id, snap.id)
 
-        (username, fullname) = get_user_info(snap.user_id)
+        (username, fullname, url) = get_user_info(snap.user_id)
 
         my_snaps.append(
             Snap(
@@ -81,6 +82,7 @@ async def filter_snaps(
                 visibility=snap.visibility,
                 has_shared=has_shared,
                 has_liked=has_liked,
+                profile_photo_url=url,
             ),
         )
 

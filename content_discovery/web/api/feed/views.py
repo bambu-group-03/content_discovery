@@ -110,7 +110,7 @@ async def get_snap(
     """Gets a snap."""
     snap = await snaps_dao.get_snap_from_id(snap_id)
     if snap:
-        (username, fullname) = get_user_info(snap.user_id)
+        (username, fullname, url) = get_user_info(snap.user_id)
         num_replies = await snaps_dao.count_replies_by_snap(snap.id)
 
         return Snap(
@@ -126,6 +126,7 @@ async def get_snap(
             parent_id=snap.parent_id,
             visibility=snap.visibility,
             num_replies=num_replies,
+            profile_photo_url=url,
         )
     raise HTTPException(status_code=NON_EXISTENT, detail="That tweet doesnt exist")
 
@@ -148,7 +149,7 @@ async def get_snaps(
         has_shared = await snaps_dao.user_has_shared(user_id, a_snap.id)
         has_liked = await snaps_dao.user_has_liked(user_id, a_snap.id)
 
-        (username, fullname) = get_user_info(a_snap.user_id)
+        (username, fullname, url) = get_user_info(a_snap.user_id)
         num_replies = await snaps_dao.count_replies_by_snap(a_snap.id)
 
         my_snaps.append(
@@ -167,6 +168,7 @@ async def get_snaps(
                 has_shared=has_shared,
                 has_liked=has_liked,
                 num_replies=num_replies,
+                profile_photo_url=url,
             ),
         )
 
@@ -184,7 +186,7 @@ async def get_snaps_and_shares(
     snaps = await snaps_dao.get_snaps_and_shares(user_id, limit, offset)
     my_snaps = []
     for a_snap in iter(snaps):
-        (username, fullname) = get_user_info(a_snap.user_id)
+        (username, fullname, url) = get_user_info(a_snap.user_id)
 
         user_has_shared = await snaps_dao.user_has_shared(user_id, a_snap.id)
         user_has_liked = await snaps_dao.user_has_liked(user_id, a_snap.id)
@@ -206,6 +208,7 @@ async def get_snaps_and_shares(
                 has_shared=user_has_shared,
                 has_liked=user_has_liked,
                 num_replies=num_replies,
+                profile_photo_url=url,
             ),
         )
     return FeedPack(snaps=my_snaps)
@@ -228,7 +231,7 @@ async def get_snaps_from_user(
     snaps = await snaps_dao.get_from_user(user_id, limit, offset)
     for a_snap in iter(snaps):
         created_at = a_snap.created_at
-        (username, fullname) = get_user_info(a_snap.user_id)
+        (username, fullname, url) = get_user_info(a_snap.user_id)
         num_replies = await snaps_dao.count_replies_by_snap(a_snap.id)
 
         my_snaps.append(
@@ -245,6 +248,7 @@ async def get_snaps_from_user(
                 parent_id=a_snap.parent_id,
                 visibility=a_snap.visibility,
                 num_replies=num_replies,
+                profile_photo_url=url,
             ),
         )
     return FeedPack(snaps=my_snaps)
@@ -258,19 +262,20 @@ def _url_get_following(user_id: str) -> str:
     return f"{settings.identity_socializer_url}/api/interactions/{user_id}/following"
 
 
-def get_user_info(user_id: str) -> tuple[str, str]:
+def get_user_info(user_id: str) -> tuple[str, str, str]:
     """Returns username and fullname of user."""
     try:
         author = httpx.get(_url_get_user(user_id)).json()
 
+        photo_url = author["profile_photo_id"]
         username = author["username"]
         first_name = author["first_name"]
         last_name = author["last_name"]
 
         fullname = f"{first_name} {last_name}"
-        return (username, fullname)
+        return (username, fullname, photo_url)
     except Exception:
-        return ("Unknown", "Unknown")
+        return ("Unknown", "Unknown", "Unknown")
 
 
 def _url_get_user(user_id: str) -> str:
@@ -304,7 +309,7 @@ async def get_snap_replies(
         has_liked = await snaps_dao.user_has_liked(user_id, snap.id)
         num_replies = await snaps_dao.count_replies_by_snap(snap.id)
 
-        (username, fullname) = get_user_info(snap.user_id)
+        (username, fullname, url) = get_user_info(snap.user_id)
 
         my_snaps.append(
             Snap(
@@ -322,6 +327,7 @@ async def get_snap_replies(
                 has_shared=has_shared,
                 has_liked=has_liked,
                 num_replies=num_replies,
+                profile_photo_url=url,
             ),
         )
 
