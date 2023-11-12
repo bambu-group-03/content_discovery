@@ -4,7 +4,7 @@ from fastapi.param_functions import Depends
 from content_discovery.db.dao.hashtag_dao import HashtagDAO
 from content_discovery.db.dao.snaps_dao import SnapDAO
 from content_discovery.web.api.feed.schema import FeedPack, Snap
-from content_discovery.web.api.feed.views import get_user_info
+from content_discovery.web.api.utils import get_user_info
 
 router = APIRouter()
 
