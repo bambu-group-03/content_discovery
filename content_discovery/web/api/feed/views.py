@@ -51,6 +51,7 @@ async def post_snap(
         favs=insp.attrs.favs.value,
         created_at=insp.attrs.created_at.value,
         username=None,
+        fullname=None,
         parent_id=insp.attrs.parent_id.value,
         visibility=insp.attrs.visibility.value,
     )
@@ -109,7 +110,7 @@ async def get_snap(
     """Gets a snap."""
     snap = await snaps_dao.get_snap_from_id(snap_id)
     if snap:
-        username = _get_username(snap.user_id)
+        (username, fullname) = _get_user_info(snap.user_id)
 
         return Snap(
             id=snap.id,
@@ -120,6 +121,7 @@ async def get_snap(
             favs=snap.favs,
             created_at=snap.created_at,
             username=username,
+            fullname=fullname,
             parent_id=snap.parent_id,
             visibility=snap.visibility,
         )
@@ -144,6 +146,8 @@ async def get_snaps(
         has_shared = await snaps_dao.user_has_shared(user_id, a_snap.id)
         has_liked = await snaps_dao.user_has_liked(user_id, a_snap.id)
 
+        (username, fullname) = _get_user_info(a_snap.user_id)
+
         my_snaps.append(
             Snap(
                 id=a_snap.id,
@@ -154,7 +158,8 @@ async def get_snaps(
                 favs=a_snap.favs,
                 created_at=a_snap.created_at,
                 parent_id=a_snap.parent_id,
-                username=_get_username(a_snap.user_id),
+                username=username,
+                fullname=fullname,
                 visibility=a_snap.visibility,
                 has_shared=has_shared,
                 has_liked=has_liked,
@@ -175,7 +180,7 @@ async def get_snaps_and_shares(
     snaps = await snaps_dao.get_snaps_and_shares(user_id, limit, offset)
     my_snaps = []
     for a_snap in iter(snaps):
-        an_author = _get_username(a_snap.user_id)
+        (username, fullname) = _get_user_info(a_snap.user_id)
 
         user_has_shared = await snaps_dao.user_has_shared(user_id, a_snap.id)
         user_has_liked = await snaps_dao.user_has_liked(user_id, a_snap.id)
@@ -190,7 +195,8 @@ async def get_snaps_and_shares(
                 favs=a_snap.favs,
                 created_at=a_snap.created_at,
                 parent_id=a_snap.parent_id,
-                username=an_author,
+                username=username,
+                fullname=fullname,
                 visibility=a_snap.visibility,
                 has_shared=user_has_shared,
                 has_liked=user_has_liked,
@@ -216,7 +222,7 @@ async def get_snaps_from_user(
     snaps = await snaps_dao.get_from_user(user_id, limit, offset)
     for a_snap in iter(snaps):
         created_at = a_snap.created_at
-        an_author = _get_username(user_id)
+        (username, fullname) = _get_user_info(a_snap.user_id)
         my_snaps.append(
             Snap(
                 id=a_snap.id,
@@ -226,7 +232,8 @@ async def get_snaps_from_user(
                 shares=a_snap.shares,
                 favs=a_snap.favs,
                 created_at=created_at,
-                username=an_author,
+                username=username,
+                fullname=fullname,
                 parent_id=a_snap.parent_id,
                 visibility=a_snap.visibility,
             ),
@@ -242,12 +249,18 @@ def _url_get_following(user_id: str) -> str:
     return f"{settings.identity_socializer_url}/api/interactions/{user_id}/following"
 
 
-def _get_username(user_id: str) -> str:
+def _get_user_info(user_id: str) -> tuple[str, str]:
     try:
         author = httpx.get(_url_get_user(user_id)).json()
-        return author["username"]
+
+        username = author["username"]
+        first_name = author["first_name"]
+        last_name = author["last_name"]
+
+        fullname = f"{first_name} {last_name}"
+        return (username, fullname)
     except Exception:
-        return "Unknown"
+        return ("Unknown", "Unknown")
 
 
 def _url_get_user(user_id: str) -> str:
