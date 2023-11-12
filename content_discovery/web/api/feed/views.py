@@ -110,7 +110,7 @@ async def get_snap(
     """Gets a snap."""
     snap = await snaps_dao.get_snap_from_id(snap_id)
     if snap:
-        (username, fullname) = _get_user_info(snap.user_id)
+        (username, fullname) = get_user_info(snap.user_id)
 
         return Snap(
             id=snap.id,
@@ -146,7 +146,7 @@ async def get_snaps(
         has_shared = await snaps_dao.user_has_shared(user_id, a_snap.id)
         has_liked = await snaps_dao.user_has_liked(user_id, a_snap.id)
 
-        (username, fullname) = _get_user_info(a_snap.user_id)
+        (username, fullname) = get_user_info(a_snap.user_id)
 
         my_snaps.append(
             Snap(
@@ -180,7 +180,7 @@ async def get_snaps_and_shares(
     snaps = await snaps_dao.get_snaps_and_shares(user_id, limit, offset)
     my_snaps = []
     for a_snap in iter(snaps):
-        (username, fullname) = _get_user_info(a_snap.user_id)
+        (username, fullname) = get_user_info(a_snap.user_id)
 
         user_has_shared = await snaps_dao.user_has_shared(user_id, a_snap.id)
         user_has_liked = await snaps_dao.user_has_liked(user_id, a_snap.id)
@@ -222,7 +222,7 @@ async def get_snaps_from_user(
     snaps = await snaps_dao.get_from_user(user_id, limit, offset)
     for a_snap in iter(snaps):
         created_at = a_snap.created_at
-        (username, fullname) = _get_user_info(a_snap.user_id)
+        (username, fullname) = get_user_info(a_snap.user_id)
         my_snaps.append(
             Snap(
                 id=a_snap.id,
@@ -249,7 +249,8 @@ def _url_get_following(user_id: str) -> str:
     return f"{settings.identity_socializer_url}/api/interactions/{user_id}/following"
 
 
-def _get_user_info(user_id: str) -> tuple[str, str]:
+def get_user_info(user_id: str) -> tuple[str, str]:
+    """Returns username and fullname of user."""
     try:
         author = httpx.get(_url_get_user(user_id)).json()
 
@@ -293,7 +294,7 @@ async def get_snap_replies(
         has_shared = await snaps_dao.user_has_shared(user_id, snap.id)
         has_liked = await snaps_dao.user_has_liked(user_id, snap.id)
 
-        (username, fullname) = _get_user_info(snap.user_id)
+        (username, fullname) = get_user_info(snap.user_id)
 
         my_snaps.append(
             Snap(

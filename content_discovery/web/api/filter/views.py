@@ -1,28 +1,87 @@
-from typing import List
-
 from fastapi import APIRouter
 from fastapi.param_functions import Depends
 
 from content_discovery.db.dao.hashtag_dao import HashtagDAO
 from content_discovery.db.dao.snaps_dao import SnapDAO
-from content_discovery.db.models.snaps_model import SnapsModel
+from content_discovery.web.api.feed.schema import FeedPack, Snap
+from content_discovery.web.api.feed.views import get_user_info
 
 router = APIRouter()
 
 
-@router.get("/hashtag/{hashtag}", response_model=None)
+@router.get("/hashtag", response_model=None)
 async def filter_hashtags(
+    user_id: str,
     hashtag: str,
     hashtag_dao: HashtagDAO = Depends(),
-) -> List[SnapsModel]:
+    snaps_dao: SnapDAO = Depends(),
+) -> FeedPack:
     """Retrieve a list of filtered snaps by hashtags."""
-    return await hashtag_dao.filter_hashtags(hashtag)
+    my_snaps = []
+
+    snaps = await hashtag_dao.filter_hashtags(hashtag)
+
+    for snap in snaps:
+        has_shared = await snaps_dao.user_has_shared(user_id, snap.id)
+        has_liked = await snaps_dao.user_has_liked(user_id, snap.id)
+
+        (username, fullname) = get_user_info(snap.user_id)
+
+        my_snaps.append(
+            Snap(
+                id=snap.id,
+                author=str(snap.user_id),
+                content=snap.content,
+                likes=snap.likes,
+                shares=snap.shares,
+                favs=snap.favs,
+                created_at=snap.created_at,
+                parent_id=snap.parent_id,
+                username=username,
+                fullname=fullname,
+                visibility=snap.visibility,
+                has_shared=has_shared,
+                has_liked=has_liked,
+            ),
+        )
+
+    return FeedPack(snaps=my_snaps)
 
 
-@router.get("/content/{content}", response_model=None)
+@router.get("/content", response_model=None)
 async def filter_snaps(
+    user_id: str,
     content: str,
-    snap_dao: SnapDAO = Depends(),
-) -> List[SnapsModel]:
+    snaps_dao: SnapDAO = Depends(),
+) -> FeedPack:
     """Retrieve a list of filtered snaps by content."""
-    return await snap_dao.filter_snaps(content)
+    my_snaps = []
+
+    snaps = await snaps_dao.filter_snaps(content)
+
+    for snap in snaps:
+
+        has_shared = await snaps_dao.user_has_shared(user_id, snap.id)
+        has_liked = await snaps_dao.user_has_liked(user_id, snap.id)
+
+        (username, fullname) = get_user_info(snap.user_id)
+
+        my_snaps.append(
+            Snap(
+                id=snap.id,
+                author=str(snap.user_id),
+                content=snap.content,
+                likes=snap.likes,
+                shares=snap.shares,
+                favs=snap.favs,
+                created_at=snap.created_at,
+                parent_id=snap.parent_id,
+                username=username,
+                fullname=fullname,
+                visibility=snap.visibility,
+                has_shared=has_shared,
+                has_liked=has_liked,
+            ),
+        )
+
+    return FeedPack(snaps=my_snaps)
