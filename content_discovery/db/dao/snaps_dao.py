@@ -183,6 +183,7 @@ class SnapDAO:
         :param offset: from where to begin providing results
         """
         query = select(SnapsModel)
+        query = query.where(SnapsModel.parent_id.is_(None))
         query = query.where(SnapsModel.visibility == Visibility.PUBLIC.value)
         query = query.where(SnapsModel.user_id.in_(users))
         query = query.order_by(SnapsModel.created_at.desc())
