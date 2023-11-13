@@ -183,6 +183,7 @@ class SnapDAO:
         :param offset: from where to begin providing results
         """
         query = select(SnapsModel)
+        query = query.where(SnapsModel.visibility == Visibility.PUBLIC.value)
         query = query.where(SnapsModel.user_id.in_(users))
         query = query.order_by(SnapsModel.created_at.desc())
         query = query.limit(limit).offset(offset)
@@ -204,6 +205,7 @@ class SnapDAO:
         :param offset: from where to begin providing results
         """
         query = select(SnapsModel)
+        query = query.where(SnapsModel.visibility == Visibility.PUBLIC.value)
         query = query.where(SnapsModel.user_id == user_id)
         query = query.limit(limit).offset(offset)
         rows = await self.session.execute(query)
@@ -335,6 +337,7 @@ class SnapDAO:
     ) -> List[SnapsModel]:
         """Get list of filtered snaps by content."""
         query = select(SnapsModel).distinct()
+        query = query.where(SnapsModel.visibility == Visibility.PUBLIC.value)
         query = query.filter(SnapsModel.content.ilike(f"%{content}%"))
 
         rows = await self.session.execute(query)
@@ -388,6 +391,7 @@ class SnapDAO:
             return []
 
         query = select(SnapsModel)
+        query = query.where(SnapsModel.visibility == Visibility.PUBLIC.value)
         query = query.where(SnapsModel.parent_id == snap_id)
         rows = await self.session.execute(query)
 

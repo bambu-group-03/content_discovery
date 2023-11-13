@@ -6,6 +6,7 @@ from fastapi import Depends
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from content_discovery.constants import Visibility
 from content_discovery.db.dependencies import get_db_session
 from content_discovery.db.models.hashtag_model import HashtagModel
 from content_discovery.db.models.snaps_model import SnapsModel
@@ -46,6 +47,7 @@ class HashtagDAO:
     ) -> List[SnapsModel]:
         """Get list of filtered snaps by hashtag."""
         query = select(SnapsModel).distinct()
+        query = query.where(SnapsModel.visibility == Visibility.PUBLIC.value)
         query = query.join(HashtagModel.snap)
         query = query.filter(HashtagModel.name.ilike(f"%{name}%"))
 
