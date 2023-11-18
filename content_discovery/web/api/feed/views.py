@@ -1,6 +1,6 @@
-from typing import Annotated, List, Optional
+from typing import List, Optional
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException
 from fastapi.param_functions import Depends
 
 from content_discovery.db.dao.hashtag_dao import HashtagDAO
@@ -117,11 +117,26 @@ async def get_snaps(
     users = [user["id"] for user in followed_users(user_id)]
     users.append(user_id)
 
-    snaps = await snaps_dao.get_from_users(users, limit, offset)
-
+    snaps = await snaps_dao.get_snaps_and_shares(users, limit, offset)
     return await complete_snaps(snaps, user_id, snaps_dao)
 
 
+@router.get("/")
+async def get_snaps(
+    user_id: str,
+    limit: int = 10,
+    offset: int = 0,
+    snaps_dao: SnapDAO = Depends(),
+) -> FeedPack:
+    """Returns a list of snap ids."""
+    users = [user["id"] for user in followed_users(user_id)]
+    users.append(user_id)
+
+    snaps = await snaps_dao.get_snaps_and_shares(users, limit, offset)
+    return await complete_snaps(snaps, user_id, snaps_dao)
+
+
+"""
 @router.get("/snaps_and_shares")
 async def get_snaps_and_shares(
     user_id: str,
@@ -130,10 +145,11 @@ async def get_snaps_and_shares(
     snaps_dao: SnapDAO = Depends(),
     user_ids: Annotated[list[str] | None, Query()] = None,
 ) -> FeedPack:
-    """Returns a list of snaps and snapshares."""
+    "Returns a list of snaps and snapshares."
     snaps = await snaps_dao.get_snaps_and_shares(user_ids, limit, offset)
 
     return await complete_snaps(snaps, None, snaps_dao)
+"""
 
 
 @router.get("/{user_id}/snaps")

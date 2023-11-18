@@ -30,7 +30,7 @@ def followed_users(user_id: str) -> List[Dict[str, str]]:
 
 
 def _url_get_following(user_id: str) -> str:
-    return f"{settings.identity_socializer_url}/api/interactions/{user_id}/following"
+    return f"{settings.identity_socializer_url}/api/auth/{user_id}/following"
 
 
 def _url_get_user(user_id: str) -> str:
