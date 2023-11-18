@@ -347,17 +347,25 @@ class SnapDAO:
 
     async def get_snaps_and_shares(
         self,
-        user_id: str,
+        user_ids: List[str],
         limit: int = 10,
         offset: int = 0,
     ) -> List[SnapsModel]:
-        """Get snaps shared by a user along with snaps written by a user"""
+        """
+        Get snaps shared by a user along with snaps written by a user
+
+        for every user in user_ids,
+        Get snaps shared by a user along with snaps written by a user
+        """
         joined = outerjoin(SnapsModel, ShareModel, SnapsModel.id == ShareModel.snap_id)
         selected = joined.select()
-        filter1 = selected.where(
-            or_(SnapsModel.user_id == user_id, ShareModel.user_id == user_id),
+        relevant_snaps = selected.where(
+            or_(
+                SnapsModel.user_id.in_(user_ids),
+                ShareModel.user_id.in_(user_ids),
+            ),
         )
-        query = filter1.order_by(
+        query = relevant_snaps.order_by(
             coalesce(SnapsModel.created_at, ShareModel.created_at).desc(),
         )
         rows = await self.session.execute(query.limit(limit).offset(offset))
