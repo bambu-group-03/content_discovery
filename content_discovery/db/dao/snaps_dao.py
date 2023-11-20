@@ -353,10 +353,13 @@ class SnapDAO:
         offset: int = 0,
     ) -> List[RowMapping]:
         """
-        Get snaps shared by a user along with snaps written by a user
+        Get snaps shared by a user along with snaps written by a user in 'user_ids'
 
-        for every user in user_ids,
-        Get snaps shared by a user along with snaps written by a user
+        Used for constructing a feed.
+        If the snap was shared, include who shared it.
+        For every RowMapping, you may access the snap data
+        using snap["SnapsModel"].a_snap_attribute
+        and the share data using snap["ShareModel"].a_share_attribute
         """
         joined = outerjoin(SnapsModel, ShareModel, SnapsModel.id == ShareModel.snap_id)
         selected = joined.select()
