@@ -105,13 +105,19 @@ async def complete_snap_and_share(
     user_id: str,
     snaps_dao: SnapDAO,
 ) -> Snap:
-    """Returns a snap with additional information."""
+    """Returns a snap with additional information about sharing."""
     (username, fullname, url) = get_user_info(snap["SnapsModel"].user_id)
 
     has_shared = await snaps_dao.user_has_shared(user_id, snap["SnapsModel"].id)
     has_liked = await snaps_dao.user_has_liked(user_id, snap["SnapsModel"].id)
     num_replies = await snaps_dao.count_replies_by_snap(snap["SnapsModel"].id)
-    was_shared_by = [snap["ShareModel"].user_id] if snap["ShareModel"] else []
+
+    if snap["ShareModel"]:
+        (username, fullname, url) = get_user_info(snap["ShareModel"].user_id)
+        was_shared_by = [username] if username else []
+    else:
+        was_shared_by = []
+
     snap = snap["SnapsModel"]
     return Snap(
         id=snap.id,
