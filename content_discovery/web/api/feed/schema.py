@@ -5,6 +5,17 @@ from typing import List, Optional
 from pydantic import BaseModel
 
 
+class SharedBy(BaseModel):
+    """Compartido por"""
+    user_id: str
+
+
+class ReplyTo(BaseModel):
+    """Reply to"""
+    user_id: str
+    snap_id: uuid.UUID
+
+
 class Snap(BaseModel):
     """Snap"""
 
@@ -23,6 +34,8 @@ class Snap(BaseModel):
     has_liked: Optional[bool] = False
     num_replies: Optional[int] = 0
     profile_photo_url: Optional[str] = None
+    is_shared_by: Optional[SharedBy] = None
+    is_reply_to: Optional[ReplyTo] = None
 
 
 class FeedPack(BaseModel):

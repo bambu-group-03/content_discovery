@@ -3,6 +3,7 @@ from typing import Any, List, Optional, Union
 
 from fastapi import Depends
 from sqlalchemy import delete, or_, outerjoin, select, update
+from sqlalchemy.engine.row import RowMapping
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql.functions import coalesce
 
@@ -350,7 +351,7 @@ class SnapDAO:
         user_ids: List[str],
         limit: int = 10,
         offset: int = 0,
-    ) -> List[SnapsModel]:
+    ) -> List[RowMapping]:
         """
         Get snaps shared by a user along with snaps written by a user
 
@@ -368,8 +369,8 @@ class SnapDAO:
         query = relevant_snaps.order_by(
             coalesce(SnapsModel.created_at, ShareModel.created_at).desc(),
         )
-        rows = await self.session.execute(query.limit(limit).offset(offset))
-        return list(rows.scalars().fetchall())
+        result = await self.session.execute(query.limit(limit).offset(offset))
+        return list(result.mappings().fetchall())
 
     async def user_has_shared(self, user_id: str, snap_id: uuid.UUID) -> bool:
         """Boolean whether user has shared the snap"""

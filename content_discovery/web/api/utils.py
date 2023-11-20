@@ -1,11 +1,12 @@
 from typing import Dict, List
 
 import httpx
+from sqlalchemy.engine.row import RowMapping
 
 from content_discovery.db.dao.snaps_dao import SnapDAO
 from content_discovery.db.models.snaps_model import SnapsModel
 from content_discovery.settings import settings
-from content_discovery.web.api.feed.schema import FeedPack, Snap
+from content_discovery.web.api.feed.schema import FeedPack, ReplyTo, SharedBy, Snap
 
 
 def get_user_info(user_id: str) -> tuple[str, str, str]:
@@ -52,6 +53,22 @@ async def complete_snaps(
     return FeedPack(snaps=my_snaps)
 
 
+async def complete_snaps_and_shares(
+    snaps: List[RowMapping],
+    user_id: str,
+    snap_dao: SnapDAO,
+) -> FeedPack:
+    """Returns a list of snaps with additional information."""
+    my_snaps = []
+
+    for snap_data in snaps:
+        completed_snap = await complete_snap_and_share(snap_data, user_id, snap_dao)
+        my_snaps.append(completed_snap)
+        print(completed_snap)
+
+    return FeedPack(snaps=my_snaps)
+
+
 async def complete_snap(
     snap: SnapsModel,
     user_id: str,
@@ -80,4 +97,48 @@ async def complete_snap(
         has_shared=has_shared,
         has_liked=has_liked,
         profile_photo_url=url,
+    )
+
+
+async def complete_snap_and_share(
+    snap: RowMapping,
+    user_id: str,
+    snaps_dao: SnapDAO,
+) -> Snap:
+    """Returns a snap with additional information."""
+    (username, fullname, url) = get_user_info(snap["SnapsModel"].user_id)
+
+    has_shared = await snaps_dao.user_has_shared(user_id, snap["SnapsModel"].id)
+    has_liked = await snaps_dao.user_has_liked(user_id, snap["SnapsModel"].id)
+    num_replies = await snaps_dao.count_replies_by_snap(snap["SnapsModel"].id)
+    reply_data = (
+        ReplyTo(
+            user_id="ARepliedUser",
+            snap_id=snap["SnapsModel"].parent_id,
+        )
+        if snap["SnapsModel"].parent_id
+        else None
+    )
+    share_data = (
+        SharedBy(user_id=snap["ShareModel"].user_id) if snap["ShareModel"] else None
+    )
+    snap = snap["SnapsModel"]
+    return Snap(
+        id=snap.id,
+        author=snap.user_id,
+        content=snap.content,
+        likes=snap.likes,
+        shares=snap.shares,
+        favs=snap.favs,
+        created_at=snap.created_at,
+        username=username,
+        fullname=fullname,
+        parent_id=snap.parent_id,
+        visibility=snap.visibility,
+        num_replies=num_replies,
+        has_shared=has_shared,
+        has_liked=has_liked,
+        profile_photo_url=url,
+        is_reply_to=reply_data,
+        is_shared_by=share_data,
     )

@@ -17,6 +17,7 @@ from content_discovery.web.api.feed.schema import (
 from content_discovery.web.api.utils import (
     complete_snap,
     complete_snaps,
+    complete_snaps_and_shares,
     followed_users,
 )
 
@@ -118,7 +119,11 @@ async def get_snaps(
     users.append(user_id)
 
     snaps = await snaps_dao.get_snaps_and_shares(users, limit, offset)
-    return await complete_snaps(snaps, user_id, snaps_dao)
+    return await complete_snaps_and_shares(
+        snaps,
+        user_id,
+        snaps_dao,
+    )
 
 
 @router.get("/{user_id}/snaps_and_shares")
@@ -134,7 +139,9 @@ async def get_snaps_and_shares(
         limit,
         offset,
     )
-    return await complete_snaps(
+    print("HELLO!")
+    print(snaps)
+    return await complete_snaps_and_shares(
         snaps,
         user_id,
         snaps_dao,
