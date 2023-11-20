@@ -6,7 +6,7 @@ from sqlalchemy.engine.row import RowMapping
 from content_discovery.db.dao.snaps_dao import SnapDAO
 from content_discovery.db.models.snaps_model import SnapsModel
 from content_discovery.settings import settings
-from content_discovery.web.api.feed.schema import FeedPack, ReplyTo, SharedBy, Snap
+from content_discovery.web.api.feed.schema import FeedPack, Snap
 
 
 def get_user_info(user_id: str) -> tuple[str, str, str]:
@@ -111,17 +111,7 @@ async def complete_snap_and_share(
     has_shared = await snaps_dao.user_has_shared(user_id, snap["SnapsModel"].id)
     has_liked = await snaps_dao.user_has_liked(user_id, snap["SnapsModel"].id)
     num_replies = await snaps_dao.count_replies_by_snap(snap["SnapsModel"].id)
-    reply_data = (
-        ReplyTo(
-            user_id="ARepliedUser",
-            snap_id=snap["SnapsModel"].parent_id,
-        )
-        if snap["SnapsModel"].parent_id
-        else None
-    )
-    share_data = (
-        SharedBy(user_id=snap["ShareModel"].user_id) if snap["ShareModel"] else None
-    )
+    was_shared_by = [snap["ShareModel"].user_id] if snap["ShareModel"] else []
     snap = snap["SnapsModel"]
     return Snap(
         id=snap.id,
@@ -139,6 +129,5 @@ async def complete_snap_and_share(
         has_shared=has_shared,
         has_liked=has_liked,
         profile_photo_url=url,
-        is_reply_to=reply_data,
-        is_shared_by=share_data,
+        is_shared_by=was_shared_by,
     )
