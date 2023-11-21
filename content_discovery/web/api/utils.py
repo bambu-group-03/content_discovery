@@ -64,7 +64,6 @@ async def complete_snaps_and_shares(
     for snap_data in snaps:
         completed_snap = await complete_snap_and_share(snap_data, user_id, snap_dao)
         my_snaps.append(completed_snap)
-        print(completed_snap)
 
     return FeedPack(snaps=my_snaps)
 

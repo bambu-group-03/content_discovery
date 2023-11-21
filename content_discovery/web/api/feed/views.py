@@ -139,8 +139,6 @@ async def get_snaps_and_shares(
         limit,
         offset,
     )
-    print("HELLO!")
-    print(snaps)
     return await complete_snaps_and_shares(
         snaps,
         user_id,
