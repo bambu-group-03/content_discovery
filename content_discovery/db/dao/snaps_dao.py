@@ -346,6 +346,30 @@ class SnapDAO:
 
         return list(rows.scalars().fetchall())
 
+    async def get_shared_snaps(
+        self,
+        user_ids: List[str],
+        limit: int = 10,
+        offset: int = 0,
+    ) -> List[SnapsModel]:
+        """
+        Get snaps shared by a user in 'user_ids'
+
+        Used for constructing the snapshare history.
+        """
+        joined = outerjoin(SnapsModel, ShareModel, SnapsModel.id == ShareModel.snap_id)
+        selected = joined.select()
+        relevant_snaps = selected.where(
+            or_(
+                ShareModel.user_id.in_(user_ids),
+            ),
+        )
+        query = relevant_snaps.order_by(
+            coalesce(SnapsModel.created_at, ShareModel.created_at).desc(),
+        )
+        result = await self.session.execute(query.limit(limit).offset(offset))
+        return list(result.scalars().fetchall())
+
     async def get_snaps_and_shares(
         self,
         user_ids: List[str],
