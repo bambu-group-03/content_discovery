@@ -6,3 +6,15 @@ class Visibility(Enum):
 
     PUBLIC = 1
     PRIVATE = 2
+
+
+class Privacy(Enum):
+    """Enum for privacy of a snap"""
+
+    PUBLIC = 1
+    FOLLOWERS = 2
+
+    def validate(self, value: int) -> None:
+        """Validates privacy"""
+        if value not in {item.value for item in Privacy}:
+            raise ValueError("Invalid privacy setting")

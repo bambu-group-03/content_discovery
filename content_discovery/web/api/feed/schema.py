@@ -37,6 +37,7 @@ class PostSnap(BaseModel):
 
     user_id: str
     content: str
+    privacy: int
 
 
 class ReplySnap(BaseModel):

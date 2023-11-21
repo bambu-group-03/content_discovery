@@ -35,9 +35,13 @@ async def post_snap(
     mention_dao: MentionDAO = Depends(),
 ) -> Optional[SnapsModel]:
     """Create a snap with the received content."""
+    # validation
+
+    # create snap
     snap = await snaps_dao.create_snaps_model(
         user_id=incoming_message.user_id,
         content=incoming_message.content,
+        privacy=incoming_message.privacy,
     )
 
     # Create hashtags and mentions

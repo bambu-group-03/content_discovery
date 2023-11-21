@@ -24,14 +24,20 @@ class SnapDAO:
     def __init__(self, session: AsyncSession = Depends(get_db_session)):
         self.session = session
 
-    async def create_snaps_model(self, user_id: str, content: str) -> SnapsModel:
+    async def create_snaps_model(
+        self,
+        user_id: str,
+        content: str,
+        privacy: int,
+    ) -> SnapsModel:
         """
         Add single snap to session.
 
         :param user_id
         :param content
+        :param privacy
         """
-        snap = SnapsModel(user_id=user_id, content=content)
+        snap = SnapsModel(user_id=user_id, content=content, privacy=privacy)
         self.session.add(snap)
         await self.session.flush()
         return snap
