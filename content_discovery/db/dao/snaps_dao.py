@@ -7,7 +7,6 @@ from sqlalchemy.engine.row import RowMapping
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql.functions import coalesce
 
-from content_discovery.constants import Visibility
 from content_discovery.db.dependencies import get_db_session
 from content_discovery.db.models.fav_model import FavModel
 from content_discovery.db.models.hashtag_model import HashtagModel
@@ -15,7 +14,13 @@ from content_discovery.db.models.like_model import LikeModel
 from content_discovery.db.models.mention_model import MentionModel
 from content_discovery.db.models.share_model import ShareModel
 from content_discovery.db.models.snaps_model import SnapsModel
-from content_discovery.db.utils import is_valid_uuid
+from content_discovery.db.utils import (
+    default_visibility,
+    is_valid_uuid,
+    private_visibility,
+    query_privacy_filter_to_only_followers,
+    query_visibility_filter,
+)
 
 
 class SnapDAO:
@@ -23,6 +28,11 @@ class SnapDAO:
 
     def __init__(self, session: AsyncSession = Depends(get_db_session)):
         self.session = session
+        self.auth = None
+
+    # UGLYHACK
+    def set_authorization(self, user_id):
+        self.auth = user_id
 
     async def create_snaps_model(
         self,
@@ -191,7 +201,8 @@ class SnapDAO:
         """
         query = select(SnapsModel)
         query = query.where(SnapsModel.parent_id.is_(None))
-        query = query.where(SnapsModel.visibility == Visibility.PUBLIC.value)
+        query = query.where(query_visibility_filter())
+        query = query.where(query_privacy_filter_to_only_followers(self.auth))
         query = query.where(SnapsModel.user_id.in_(users))
         query = query.order_by(SnapsModel.created_at.desc())
         query = query.limit(limit).offset(offset)
@@ -213,7 +224,8 @@ class SnapDAO:
         :param offset: from where to begin providing results
         """
         query = select(SnapsModel)
-        query = query.where(SnapsModel.visibility == Visibility.PUBLIC.value)
+        query = query.where(query_visibility_filter())
+        query = query.where(query_privacy_filter_to_only_followers(self.auth))
         query = query.where(SnapsModel.user_id == user_id)
         query = query.limit(limit).offset(offset)
         rows = await self.session.execute(query)
@@ -318,7 +330,7 @@ class SnapDAO:
             update(SnapsModel)
             .where(SnapsModel.id == snap_id)
             .values(
-                visibility=Visibility.PUBLIC.value,
+                visibility=default_visibility(),
             )
         )
 
@@ -333,7 +345,7 @@ class SnapDAO:
             update(SnapsModel)
             .where(SnapsModel.id == snap_id)
             .values(
-                visibility=Visibility.PRIVATE.value,
+                visibility=private_visibility(),
             )
         )
 
@@ -345,7 +357,8 @@ class SnapDAO:
     ) -> List[SnapsModel]:
         """Get list of filtered snaps by content."""
         query = select(SnapsModel).distinct()
-        query = query.where(SnapsModel.visibility == Visibility.PUBLIC.value)
+        query = query.where(query_visibility_filter())
+        query = query.where(query_privacy_filter_to_only_followers(self.auth))
         query = query.filter(SnapsModel.content.ilike(f"%{content}%"))
 
         rows = await self.session.execute(query)
@@ -434,7 +447,8 @@ class SnapDAO:
             return []
 
         query = select(SnapsModel)
-        query = query.where(SnapsModel.visibility == Visibility.PUBLIC.value)
+        query = query.where(query_visibility_filter())
+        query = query.where(query_privacy_filter_to_only_followers(self.auth))
         query = query.where(SnapsModel.parent_id == snap_id)
         rows = await self.session.execute(query)
 

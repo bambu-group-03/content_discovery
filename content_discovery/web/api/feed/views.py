@@ -3,6 +3,7 @@ from typing import List, Optional
 from fastapi import APIRouter, HTTPException
 from fastapi.param_functions import Depends
 
+from content_discovery.constants import Privacy
 from content_discovery.db.dao.hashtag_dao import HashtagDAO
 from content_discovery.db.dao.mention_dao import MentionDAO
 from content_discovery.db.dao.snaps_dao import SnapDAO
@@ -35,8 +36,8 @@ async def post_snap(
     mention_dao: MentionDAO = Depends(),
 ) -> Optional[SnapsModel]:
     """Create a snap with the received content."""
-    # validation
-
+    Privacy.validate(incoming_message.privacy)
+    snaps_dao.set_authorization(incoming_message.user_id)
     # create snap
     snap = await snaps_dao.create_snaps_model(
         user_id=incoming_message.user_id,
@@ -59,6 +60,7 @@ async def reply_snap(
     mention_dao: MentionDAO = Depends(),
 ) -> Optional[SnapsModel]:
     """Create a reply snap with the received content."""
+    snaps_dao.set_authorization(incoming_message.user_id)
     if not incoming_message.parent_id:
         return None
 
@@ -84,6 +86,7 @@ async def update_snap(
     snaps_dao: SnapDAO = Depends(),
 ) -> None:
     """Updates a snap."""
+    snaps_dao.set_authorization(body.user_id)
     await snaps_dao.update_snap(body.user_id, body.snap_id, body.content)
 
 
@@ -93,6 +96,7 @@ async def delete_snap(
     snaps_dao: SnapDAO = Depends(),
 ) -> None:
     """Deletes a snap."""
+    # snaps_dao.set_authorization(body.user_id)
     await snaps_dao.delete_snap(snap_id)
 
 
@@ -103,6 +107,7 @@ async def get_snap(
     snaps_dao: SnapDAO = Depends(),
 ) -> Snap:
     """Gets a snap."""
+    snaps_dao.set_authorization(user_id)
     snap = await snaps_dao.get_snap_from_id(snap_id)
 
     if snap:
@@ -119,9 +124,9 @@ async def get_snaps(
     snaps_dao: SnapDAO = Depends(),
 ) -> FeedPack:
     """Returns a list of snaps shared or written by the user's followed."""
+    snaps_dao.set_authorization(user_id)
     users = [user["id"] for user in followed_users(user_id)]
     users.append(user_id)
-
     snaps = await snaps_dao.get_snaps_and_shares(users, limit, offset)
     return await complete_snaps_and_shares(
         snaps,
@@ -138,6 +143,7 @@ async def get_snaps_and_shares(
     snaps_dao: SnapDAO = Depends(),
 ) -> FeedPack:
     """Returns a list of snaps and snapshares from user."""
+    snaps_dao.set_authorization(user_id)
     snaps = await snaps_dao.get_snaps_and_shares(
         [user_id],
         limit,
@@ -158,6 +164,7 @@ async def get_shares(
     snaps_dao: SnapDAO = Depends(),
 ) -> FeedPack:
     """Returns a list of snaps and snapshares from user."""
+    snaps_dao.set_authorization(user_id)
     snaps = await snaps_dao.get_shared_snaps(
         [user_id],
         limit,
@@ -183,6 +190,7 @@ async def get_snaps_from_user(
     WARNING: Does not check if user requested is valid.
     If user does not exist, returns empty list.
     """
+    snaps_dao.set_authorization(user_id)
     snaps = await snaps_dao.get_from_user(user_id, limit, offset)
 
     return await complete_snaps(snaps, user_id, snaps_dao)
@@ -205,6 +213,7 @@ async def get_snap_replies(
     snaps_dao: SnapDAO = Depends(),
 ) -> FeedPack:
     """Returns a list of replies of a snap ids."""
+    snaps_dao.set_authorization(user_id)
     snaps = await snaps_dao.get_snap_replies(snap_id)
 
     return await complete_snaps(snaps, user_id, snaps_dao)

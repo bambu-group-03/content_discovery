@@ -19,6 +19,7 @@ class Snap(BaseModel):
     fullname: Optional[str]
     parent_id: Optional[uuid.UUID]
     visibility: int
+    privacy: int
     has_shared: Optional[bool] = False
     has_liked: Optional[bool] = False
     num_replies: Optional[int] = 0

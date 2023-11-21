@@ -26,8 +26,32 @@ def get_user_info(user_id: str) -> tuple[str, str, str]:
 
 
 def followed_users(user_id: str) -> List[Dict[str, str]]:
-    """Returns a list of users that the user follows."""
+    """
+    Returns a list of users that the user follows.
+
+    Example:
+    {
+        "id": "greta",
+        "first_name": null,
+        "last_name": null,
+        "username": "gretaa",
+        "phone_number": null,
+        "bio_msg": null,
+        "profile_photo_id": null,
+        "ubication": null,
+        "is_followed": true
+    }
+    """
     return httpx.get(_url_get_following(user_id)).json()
+
+
+def followers(user_id: str) -> List[Dict[str, str]]:
+    """Returns a list of users that follow the user."""
+    return httpx.get(_url_get_followers(user_id)).json()
+
+
+def _url_get_followers(user_id: str) -> str:
+    return f"{settings.identity_socializer_url}/api/interactions/{user_id}/followers"
 
 
 def _url_get_following(user_id: str) -> str:
@@ -92,6 +116,7 @@ async def complete_snap(
         fullname=fullname,
         parent_id=snap.parent_id,
         visibility=snap.visibility,
+        privacy=snap.privacy,
         num_replies=num_replies,
         has_shared=has_shared,
         has_liked=has_liked,
@@ -130,6 +155,7 @@ async def complete_snap_and_share(
         fullname=fullname,
         parent_id=snap.parent_id,
         visibility=snap.visibility,
+        privacy=snap.privacy,
         num_replies=num_replies,
         has_shared=has_shared,
         has_liked=has_liked,
