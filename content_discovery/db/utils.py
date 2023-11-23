@@ -62,26 +62,24 @@ def is_valid_uuid(value: Any) -> bool:
 from sqlalchemy import or_
 
 
-def query_visibility_filter():
+def query_visibility_filter() -> Any:
+    "Snap visibility is public"
     return SnapsModel.visibility == Visibility.PUBLIC.value
 
 
-def default_visibility():
+def default_visibility() -> int:
     return Visibility.PUBLIC.value
 
 
-def private_visibility():
+def private_visibility() -> int:
     return Visibility.PRIVATE.value
 
 
-def query_privacy_filter_to_only_followers(requesting_user_id):
+def query_privacy_filter_to_only_followers(followed_by_user) -> Any:
     """
     Get query expression for: snap.privacy = 1 OR snap.user_id IN [followed1, followed2]
     this function pings identity socializer to resolve followed users
     """
-    from content_discovery.web.api.utils import followed_users  # ,followers
-
-    followed_by_user = followed_users(requesting_user_id)
     followed_by_user_list = list(map(lambda dict: dict["id"], followed_by_user))
     return or_(
         SnapsModel.privacy == 1,

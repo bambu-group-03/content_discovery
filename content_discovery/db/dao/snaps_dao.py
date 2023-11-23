@@ -28,11 +28,6 @@ class SnapDAO:
 
     def __init__(self, session: AsyncSession = Depends(get_db_session)):
         self.session = session
-        self.auth = None
-
-    # UGLYHACK
-    def set_authorization(self, user_id):
-        self.auth = user_id
 
     async def create_snaps_model(
         self,
@@ -186,33 +181,10 @@ class SnapDAO:
         rows = await self.session.execute(query)
         return rows.scalars().first()
 
-    async def get_from_users(
-        self,
-        users: list[str],
-        limit: int,
-        offset: int,
-    ) -> list[SnapsModel]:
-        """
-        Get snaps from a set of users.
-
-        :param user_id:
-        :param limit: up to ho many snaps to get
-        :param offset: from where to begin providing results
-        """
-        query = select(SnapsModel)
-        query = query.where(SnapsModel.parent_id.is_(None))
-        query = query.where(query_visibility_filter())
-        query = query.where(query_privacy_filter_to_only_followers(self.auth))
-        query = query.where(SnapsModel.user_id.in_(users))
-        query = query.order_by(SnapsModel.created_at.desc())
-        query = query.limit(limit).offset(offset)
-
-        rows = await self.session.execute(query)
-        return list(rows.scalars().fetchall())
-
     async def get_from_user(
         self,
         user_id: str,
+        requester_is_following: list[str],
         limit: int,
         offset: int,
     ) -> list[SnapsModel]:
@@ -225,7 +197,9 @@ class SnapDAO:
         """
         query = select(SnapsModel)
         query = query.where(query_visibility_filter())
-        query = query.where(query_privacy_filter_to_only_followers(self.auth))
+        query = query.where(
+            query_privacy_filter_to_only_followers(requester_is_following),
+        )
         query = query.where(SnapsModel.user_id == user_id)
         query = query.limit(limit).offset(offset)
         rows = await self.session.execute(query)
@@ -354,11 +328,14 @@ class SnapDAO:
     async def filter_snaps(
         self,
         content: str,
+        requester_is_following: list[str],
     ) -> List[SnapsModel]:
         """Get list of filtered snaps by content."""
         query = select(SnapsModel).distinct()
         query = query.where(query_visibility_filter())
-        query = query.where(query_privacy_filter_to_only_followers(self.auth))
+        query = query.where(
+            query_privacy_filter_to_only_followers(requester_is_following),
+        )
         query = query.filter(SnapsModel.content.ilike(f"%{content}%"))
 
         rows = await self.session.execute(query)
@@ -375,6 +352,7 @@ class SnapDAO:
         Get snaps shared by a user in 'user_ids'
 
         Used for constructing the snapshare history.
+        TODO: what happens if you share a snap and then it's made private?
         """
         joined = outerjoin(SnapsModel, ShareModel, SnapsModel.id == ShareModel.snap_id)
         selected = joined.select()
@@ -386,12 +364,14 @@ class SnapDAO:
         query = relevant_snaps.order_by(
             coalesce(SnapsModel.created_at, ShareModel.created_at).desc(),
         )
+        query = query.where(query_visibility_filter())
         result = await self.session.execute(query.limit(limit).offset(offset))
         return list(result.scalars().fetchall())
 
     async def get_snaps_and_shares(
         self,
         user_ids: List[str],
+        followed_by_requesting_user: List[str],
         limit: int = 10,
         offset: int = 0,
     ) -> List[RowMapping]:
@@ -406,13 +386,15 @@ class SnapDAO:
         """
         joined = outerjoin(SnapsModel, ShareModel, SnapsModel.id == ShareModel.snap_id)
         selected = joined.select()
-        relevant_snaps = selected.where(
+        query = selected.where(
             or_(
                 SnapsModel.user_id.in_(user_ids),
                 ShareModel.user_id.in_(user_ids),
             ),
         )
-        query = relevant_snaps.order_by(
+        # query = query.where(query_visibility_filter())
+        # query = query.where(query_privacy_filter_to_only_followers(followed_by_requesting_user))
+        query = query.order_by(
             coalesce(SnapsModel.created_at, ShareModel.created_at).desc(),
         )
         result = await self.session.execute(query.limit(limit).offset(offset))
@@ -441,14 +423,22 @@ class SnapDAO:
 
         return bool(my_list)
 
-    async def get_snap_replies(self, snap_id: str) -> List[SnapsModel]:
+    # codigo repetido - uno filtra privacidad y otro no
+
+    async def get_snap_replies(
+        self,
+        snap_id: str,
+        requester_is_following: list[str],
+    ) -> List[SnapsModel]:
         """Get replies to a snap"""
         if not is_valid_uuid(snap_id):
             return []
 
         query = select(SnapsModel)
         query = query.where(query_visibility_filter())
-        query = query.where(query_privacy_filter_to_only_followers(self.auth))
+        query = query.where(
+            query_privacy_filter_to_only_followers(requester_is_following),
+        )
         query = query.where(SnapsModel.parent_id == snap_id)
         rows = await self.session.execute(query)
 
@@ -456,6 +446,11 @@ class SnapDAO:
 
     async def count_replies_by_snap(self, snap_id: Any) -> int:
         """Get number of replies of snap_id"""
-        replies = await self.get_snap_replies(snap_id)
+        """Get replies to a snap"""
+        if not is_valid_uuid(snap_id):
+            raise Exception("bad UUID")
 
-        return len(replies)
+        query = select(SnapsModel)
+        query = query.where(SnapsModel.parent_id == snap_id)
+        rows = await self.session.execute(query)
+        return len(list(rows.scalars().fetchall()))

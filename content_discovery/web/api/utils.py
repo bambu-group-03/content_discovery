@@ -25,6 +25,10 @@ def get_user_info(user_id: str) -> tuple[str, str, str]:
         return ("Unknown", "Unknown", "Unknown")
 
 
+def followed_users_ids(user_id: str) -> List[str]:
+    return [user["id"] for user in followed_users(user_id)] + [user_id]
+
+
 def followed_users(user_id: str) -> List[Dict[str, str]]:
     """
     Returns a list of users that the user follows.
