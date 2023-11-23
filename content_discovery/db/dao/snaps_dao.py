@@ -3,6 +3,7 @@ from typing import Any, List, Optional, Union
 
 from fastapi import Depends
 from sqlalchemy import delete, or_, outerjoin, select, update
+from sqlalchemy.engine.row import RowMapping
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql.functions import coalesce
 
@@ -350,12 +351,15 @@ class SnapDAO:
         user_ids: List[str],
         limit: int = 10,
         offset: int = 0,
-    ) -> List[SnapsModel]:
+    ) -> List[RowMapping]:
         """
-        Get snaps shared by a user along with snaps written by a user
+        Get snaps shared by a user along with snaps written by a user in 'user_ids'
 
-        for every user in user_ids,
-        Get snaps shared by a user along with snaps written by a user
+        Used for constructing a feed.
+        If the snap was shared, include who shared it.
+        For every RowMapping, you may access the snap data
+        using snap["SnapsModel"].a_snap_attribute
+        and the share data using snap["ShareModel"].a_share_attribute
         """
         joined = outerjoin(SnapsModel, ShareModel, SnapsModel.id == ShareModel.snap_id)
         selected = joined.select()
@@ -368,8 +372,8 @@ class SnapDAO:
         query = relevant_snaps.order_by(
             coalesce(SnapsModel.created_at, ShareModel.created_at).desc(),
         )
-        rows = await self.session.execute(query.limit(limit).offset(offset))
-        return list(rows.scalars().fetchall())
+        result = await self.session.execute(query.limit(limit).offset(offset))
+        return list(result.mappings().fetchall())
 
     async def user_has_shared(self, user_id: str, snap_id: uuid.UUID) -> bool:
         """Boolean whether user has shared the snap"""

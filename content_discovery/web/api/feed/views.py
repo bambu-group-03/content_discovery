@@ -17,6 +17,7 @@ from content_discovery.web.api.feed.schema import (
 from content_discovery.web.api.utils import (
     complete_snap,
     complete_snaps,
+    complete_snaps_and_shares,
     followed_users,
 )
 
@@ -113,12 +114,36 @@ async def get_snaps(
     offset: int = 0,
     snaps_dao: SnapDAO = Depends(),
 ) -> FeedPack:
-    """Returns a list of snap ids."""
+    """Returns a list of snaps shared or written by the user's followed."""
     users = [user["id"] for user in followed_users(user_id)]
     users.append(user_id)
 
     snaps = await snaps_dao.get_snaps_and_shares(users, limit, offset)
-    return await complete_snaps(snaps, user_id, snaps_dao)
+    return await complete_snaps_and_shares(
+        snaps,
+        user_id,
+        snaps_dao,
+    )
+
+
+@router.get("/{user_id}/snaps_and_shares")
+async def get_snaps_and_shares(
+    user_id: str,
+    limit: int = 10,
+    offset: int = 0,
+    snaps_dao: SnapDAO = Depends(),
+) -> FeedPack:
+    """Returns a list of snaps and snapshares from user."""
+    snaps = await snaps_dao.get_snaps_and_shares(
+        [user_id],
+        limit,
+        offset,
+    )
+    return await complete_snaps_and_shares(
+        snaps,
+        user_id,
+        snaps_dao,
+    )
 
 
 @router.get("/{user_id}/snaps")

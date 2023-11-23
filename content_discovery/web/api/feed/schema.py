@@ -23,6 +23,7 @@ class Snap(BaseModel):
     has_liked: Optional[bool] = False
     num_replies: Optional[int] = 0
     profile_photo_url: Optional[str] = None
+    is_shared_by: List[str] = []
 
 
 class FeedPack(BaseModel):
