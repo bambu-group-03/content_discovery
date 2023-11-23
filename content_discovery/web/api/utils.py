@@ -42,7 +42,7 @@ def followed_users(user_id: str) -> List[Dict[str, str]]:
         "is_followed": true
     }
     """
-    return httpx.get(_url_get_following(user_id)).json()  # + [{"id": user_id}]
+    return httpx.get(_url_get_following(user_id)).json() + [{"id": user_id}]
 
 
 def followers(user_id: str) -> List[Dict[str, str]]:
