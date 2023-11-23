@@ -146,6 +146,26 @@ async def get_snaps_and_shares(
     )
 
 
+@router.get("/{user_id}/shares")
+async def get_shares(
+    user_id: str,
+    limit: int = 10,
+    offset: int = 0,
+    snaps_dao: SnapDAO = Depends(),
+) -> FeedPack:
+    """Returns a list of snaps and snapshares from user."""
+    snaps = await snaps_dao.get_shared_snaps(
+        [user_id],
+        limit,
+        offset,
+    )
+    return await complete_snaps(
+        snaps,
+        user_id,
+        snaps_dao,
+    )
+
+
 @router.get("/{user_id}/snaps")
 async def get_snaps_from_user(
     user_id: str,
