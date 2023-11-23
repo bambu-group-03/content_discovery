@@ -5,8 +5,6 @@ from sqlalchemy import text
 from sqlalchemy.engine import make_url
 from sqlalchemy.ext.asyncio import create_async_engine
 
-from content_discovery.constants import Visibility
-from content_discovery.db.models.snaps_model import SnapsModel
 from content_discovery.settings import settings
 
 
@@ -59,37 +57,7 @@ def is_valid_uuid(value: Any) -> bool:
         return False
 
 
-from sqlalchemy import or_
-
-
-def query_visibility_filter() -> Any:
-    "Snap visibility is public"
-    return SnapsModel.visibility == Visibility.PUBLIC.value
-
-
-def default_visibility() -> int:
-    return Visibility.PUBLIC.value
-
-
-def private_visibility() -> int:
-    return Visibility.PRIVATE.value
-
-
-def query_privacy_filter_to_only_followers(followed_by_user) -> Any:
-    """
-    Get query expression for: snap.privacy = 1 OR snap.user_id IN [followed1, followed2]
-    this function pings identity socializer to resolve followed users
-    """
-    followed_by_user_list = list(map(lambda dict: dict["id"], followed_by_user))
-    return or_(
-        SnapsModel.privacy == 1,
-        SnapsModel.user_id.in_(followed_by_user_list),
-    )
-
-
-"""
-def _filter_privacy_to_only_mutuals_of_author(user_id):
-    _mutuals = mutuals(user_id)
-    return or_(SnapsModel.privacy == 1,
-               SnapsModel.user_id.in_(mutuals))
-"""
+# def _filter_privacy_to_only_mutuals_of_author(user_id):
+#    _mutuals = mutuals(user_id)
+#    return or_(SnapsModel.privacy == 1,
+#               SnapsModel.user_id.in_(mutuals))

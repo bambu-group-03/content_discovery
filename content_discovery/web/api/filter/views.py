@@ -4,7 +4,7 @@ from fastapi.param_functions import Depends
 from content_discovery.db.dao.hashtag_dao import HashtagDAO
 from content_discovery.db.dao.snaps_dao import SnapDAO
 from content_discovery.web.api.feed.schema import FeedPack
-from content_discovery.web.api.utils import complete_snaps, followed_users_ids
+from content_discovery.web.api.utils import complete_snaps, followed_users
 
 router = APIRouter()
 
@@ -29,6 +29,6 @@ async def filter_snaps(
     snaps_dao: SnapDAO = Depends(),
 ) -> FeedPack:
     """Retrieve a list of filtered snaps by content."""
-    users = followed_users_ids(user_id)
+    users = followed_users(user_id)
     snaps = await snaps_dao.filter_snaps(content, users)
     return await complete_snaps(snaps, user_id, snaps_dao)
