@@ -49,15 +49,10 @@ class SnapDAO:
         parent_id: str,
     ) -> Optional[SnapsModel]:
         """Add reply snap to session."""
-        try:
-            snap = SnapsModel(user_id=user_id, content=content, parent_id=parent_id)
-
-            self.session.add(snap)
-            await self.session.flush()
-
-            return snap
-        except Exception:
-            return None
+        snap = SnapsModel(user_id=user_id, content=content, parent_id=parent_id)
+        self.session.add(snap)
+        await self.session.flush()
+        return snap
 
     async def update_snap(
         self,
@@ -191,7 +186,7 @@ class SnapDAO:
         :param offset: from where to begin providing results
         """
         query = select(SnapsModel)
-        query = query.where(_query_visibility_filter())
+        query = _query_visibility_is_public(query)
         query = _query_privacy_filter_to_only_followers(query, requester_is_following)
         query = query.where(SnapsModel.user_id == user_id)
         query = query.limit(limit).offset(offset)
@@ -325,7 +320,7 @@ class SnapDAO:
     ) -> List[SnapsModel]:
         """Get list of filtered snaps by content."""
         query = select(SnapsModel).distinct()
-        query = query.where(_query_visibility_filter())
+        query = _query_visibility_is_public(query)
         query = _query_privacy_filter_to_only_followers(query, requester_is_following)
         query = query.filter(SnapsModel.content.ilike(f"%{content}%"))
 
@@ -355,7 +350,7 @@ class SnapDAO:
         query = relevant_snaps.order_by(
             coalesce(SnapsModel.created_at, ShareModel.created_at).desc(),
         )
-        query = query.where(_query_visibility_filter())
+        query = _query_visibility_is_public(query)
         result = await self.session.execute(query.limit(limit).offset(offset))
         return list(result.scalars().fetchall())
 
@@ -367,7 +362,7 @@ class SnapDAO:
         offset: int = 0,
     ) -> List[RowMapping]:
         """
-        Get snaps shared by a user along with snaps written by a user in 'user_ids'
+        Get snaps written or shared by a user in 'users'
 
         Used for constructing a feed.
         If the snap was shared, include who shared it.
@@ -425,7 +420,7 @@ class SnapDAO:
             return []
 
         query = select(SnapsModel)
-        query = query.where(_query_visibility_filter())
+        query = _query_visibility_is_public(query)
         query = _query_privacy_filter_to_only_followers(query, requester_is_following)
         query = query.where(SnapsModel.parent_id == snap_id)
         rows = await self.session.execute(query)
@@ -443,9 +438,9 @@ class SnapDAO:
         return len(list(rows.scalars().fetchall()))
 
 
-def _query_visibility_filter() -> Any:
+def _query_visibility_is_public(query: Any) -> Any:
     """Snap visibility is public"""
-    return SnapsModel.visibility == Visibility.PUBLIC.value
+    return query.where(SnapsModel.visibility == Visibility.PUBLIC.value)
 
 
 def _default_visibility() -> int:
