@@ -339,7 +339,7 @@ class SnapDAO:
         user_ids: List[str],
         limit: int = 10,
         offset: int = 0,
-    ) -> List[RowMapping]:
+    ) -> List[SnapsModel]:
         """
 
         Get snaps shared by a user in 'user_ids'
@@ -391,7 +391,7 @@ class SnapDAO:
         query = query.order_by(
             coalesce(SnapsModel.created_at, ShareModel.created_at).desc(),
         )
-        
+
         result = await self.session.execute(query.limit(limit).offset(offset))
         return list(result.mappings().fetchall())
 
