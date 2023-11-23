@@ -6,6 +6,8 @@ extend-ignore = E203
 docstring_style=sphinx
 
 ignore =
+  RST301,
+  RST201,
   DAR002,
   DAR401,
   ; First line should end with a period

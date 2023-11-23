@@ -55,3 +55,9 @@ def is_valid_uuid(value: Any) -> bool:
         return True
     except ValueError:
         return False
+
+
+# def _filter_privacy_to_only_mutuals_of_author(user_id):
+#    _mutuals = mutuals(user_id)
+#    return or_(SnapsModel.privacy == 1,
+#               SnapsModel.user_id.in_(mutuals))
