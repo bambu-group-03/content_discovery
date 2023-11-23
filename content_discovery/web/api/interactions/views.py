@@ -3,8 +3,11 @@ from fastapi.param_functions import Depends
 
 from content_discovery.db.dao.fav_dao import FavDAO
 from content_discovery.db.dao.like_dao import LikeDAO
+from content_discovery.db.dao.mention_dao import MentionDAO
 from content_discovery.db.dao.share_dao import ShareDAO
 from content_discovery.db.dao.snaps_dao import SnapDAO
+from content_discovery.web.api.feed.schema import FeedPack
+from content_discovery.web.api.utils import complete_snaps
 
 router = APIRouter()
 
@@ -144,3 +147,14 @@ async def make_snap_private(
 ) -> None:
     """User makes a snap private."""
     await snap_dao.make_private(snap_id)
+
+
+@router.post("/mentions/{user_id}")
+async def get_mentioned_snap_by_id(
+    user_id: str,
+    mention_dao: MentionDAO = Depends(),
+    snap_dao: SnapDAO = Depends(),
+) -> FeedPack:
+    """Returns a list of snaps where the user is mentioned."""
+    snaps = await mention_dao.get_mentions(user_id)
+    return await complete_snaps(snaps, user_id, snap_dao)

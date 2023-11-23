@@ -339,12 +339,14 @@ class SnapDAO:
         user_ids: List[str],
         limit: int = 10,
         offset: int = 0,
-    ) -> List[SnapsModel]:
+    ) -> List[RowMapping]:
         """
+
         Get snaps shared by a user in 'user_ids'
 
         Used for constructing the snapshare history.
         TODO: what happens if you share a snap and then it's made private?
+
         """
         joined = outerjoin(SnapsModel, ShareModel, SnapsModel.id == ShareModel.snap_id)
         selected = joined.select()
@@ -356,6 +358,7 @@ class SnapDAO:
         query = relevant_snaps.order_by(
             coalesce(SnapsModel.created_at, ShareModel.created_at).desc(),
         )
+
         query = _query_visibility_is_public(query)
         result = await self.session.execute(query.limit(limit).offset(offset))
         return list(result.scalars().fetchall())
@@ -388,6 +391,7 @@ class SnapDAO:
         query = query.order_by(
             coalesce(SnapsModel.created_at, ShareModel.created_at).desc(),
         )
+        
         result = await self.session.execute(query.limit(limit).offset(offset))
         return list(result.mappings().fetchall())
 

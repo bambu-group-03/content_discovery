@@ -162,3 +162,42 @@ async def complete_snap_and_share(
         profile_photo_url=url,
         is_shared_by=was_shared_by,
     )
+
+
+async def complete_snap_and_share(
+    snap: RowMapping,
+    user_id: str,
+    snaps_dao: SnapDAO,
+) -> Snap:
+    """Returns a snap with additional information about sharing."""
+    (username, fullname, url) = get_user_info(snap["SnapsModel"].user_id)
+
+    has_shared = await snaps_dao.user_has_shared(user_id, snap["SnapsModel"].id)
+    has_liked = await snaps_dao.user_has_liked(user_id, snap["SnapsModel"].id)
+    num_replies = await snaps_dao.count_replies_by_snap(snap["SnapsModel"].id)
+
+    if snap["ShareModel"]:
+        (username, fullname, url) = get_user_info(snap["ShareModel"].user_id)
+        was_shared_by = [username] if username else []
+    else:
+        was_shared_by = []
+
+    snap = snap["SnapsModel"]
+    return Snap(
+        id=snap.id,
+        author=snap.user_id,
+        content=snap.content,
+        likes=snap.likes,
+        shares=snap.shares,
+        favs=snap.favs,
+        created_at=snap.created_at,
+        username=username,
+        fullname=fullname,
+        parent_id=snap.parent_id,
+        visibility=snap.visibility,
+        num_replies=num_replies,
+        has_shared=has_shared,
+        has_liked=has_liked,
+        profile_photo_url=url,
+        is_shared_by=was_shared_by,
+    )
