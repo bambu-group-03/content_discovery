@@ -66,6 +66,7 @@ async def reply_snap(
         user_id=incoming_message.user_id,
         content=incoming_message.content,
         parent_id=incoming_message.parent_id,
+        privacy=incoming_message.privacy,
     )
 
     if not reply:

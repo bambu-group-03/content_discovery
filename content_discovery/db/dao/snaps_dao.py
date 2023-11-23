@@ -47,9 +47,15 @@ class SnapDAO:
         user_id: str,
         content: str,
         parent_id: str,
+        privacy: int,
     ) -> Optional[SnapsModel]:
         """Add reply snap to session."""
-        snap = SnapsModel(user_id=user_id, content=content, parent_id=parent_id)
+        snap = SnapsModel(
+            user_id=user_id,
+            content=content,
+            parent_id=parent_id,
+            privacy=privacy,
+        )
         self.session.add(snap)
         await self.session.flush()
         return snap

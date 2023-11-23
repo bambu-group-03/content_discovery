@@ -47,6 +47,7 @@ class ReplySnap(BaseModel):
     user_id: str
     parent_id: str
     content: str
+    privacy: int
 
 
 class UpdateSnap(BaseModel):
