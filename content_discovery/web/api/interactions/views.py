@@ -149,7 +149,7 @@ async def make_snap_private(
     await snap_dao.make_private(snap_id)
 
 
-@router.post("/mentions/{user_id}")
+@router.get("/mentions/{user_id}")
 async def get_mentioned_snap_by_id(
     user_id: str,
     mention_dao: MentionDAO = Depends(),
