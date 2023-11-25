@@ -23,7 +23,6 @@ from content_discovery.web.api.utils import (
     followed_users,
 )
 
-
 class BackgroundTask:
     def __init__(self):
         self.VAR = 0
