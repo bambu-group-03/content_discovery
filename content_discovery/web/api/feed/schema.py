@@ -11,7 +11,7 @@ class Snap(BaseModel):
     id: uuid.UUID
     author: str
     content: str
-    likes: int
+    likes: Optional[int]  # es None en caso de no autorización de ver likes
     shares: int
     favs: int
     created_at: datetime

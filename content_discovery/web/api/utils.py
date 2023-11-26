@@ -50,12 +50,27 @@ def followers(user_id: str) -> List[Dict[str, str]]:
     return httpx.get(_url_get_followers(user_id)).json()
 
 
+def is_mutuals_or_equal(user_id: str, another_id: str) -> bool:
+    """True if ids are equal or mutually follow each other."""
+    if user_id == another_id:
+        return True
+    text = httpx.get(_url_is_mutuals(user_id, another_id)).text
+    return text == "true"
+
+
 def _url_get_followers(user_id: str) -> str:
-    return f"{settings.identity_socializer_url}/api/interactions/{user_id}/followers"
+    url = settings.identity_socializer_url
+    return f"{url}/api/interactions/{user_id}/followers"
+
+
+def _url_is_mutuals(user_id: str, another_id: str) -> str:
+    url = settings.identity_socializer_url
+    return f"{url}/api/interactions/{user_id}/mutuals_with/{another_id}"
 
 
 def _url_get_following(user_id: str) -> str:
-    return f"{settings.identity_socializer_url}/api/interactions/{user_id}/following"
+    url = settings.identity_socializer_url
+    return f"{url}/api/interactions/{user_id}/following"
 
 
 def _url_get_user(user_id: str) -> str:
@@ -103,12 +118,13 @@ async def complete_snap(
     has_shared = await snaps_dao.user_has_shared(user_id, snap.id)
     has_liked = await snaps_dao.user_has_liked(user_id, snap.id)
     num_replies = await snaps_dao.count_replies_by_snap(snap.id)
-
+    can_see_likes = is_mutuals_or_equal(user_id, snap.user_id)
+    likes = snap.likes if can_see_likes else None
     return Snap(
         id=snap.id,
         author=snap.user_id,
         content=snap.content,
-        likes=snap.likes,
+        likes=likes,
         shares=snap.shares,
         favs=snap.favs,
         created_at=snap.created_at,
@@ -132,9 +148,12 @@ async def complete_snap_and_share(
     """Returns a snap with additional information about sharing."""
     (username, fullname, url) = get_user_info(snap["SnapsModel"].user_id)
 
+    # TODO: repeated code
     has_shared = await snaps_dao.user_has_shared(user_id, snap["SnapsModel"].id)
     has_liked = await snaps_dao.user_has_liked(user_id, snap["SnapsModel"].id)
     num_replies = await snaps_dao.count_replies_by_snap(snap["SnapsModel"].id)
+    can_see_likes = is_mutuals_or_equal(user_id, snap["SnapsModel"].user_id)
+    likes = snap["SnapsModel"].likes if can_see_likes else None
 
     if snap["ShareModel"]:
         (username, fullname, url) = get_user_info(snap["ShareModel"].user_id)
@@ -147,7 +166,7 @@ async def complete_snap_and_share(
         id=snap.id,
         author=snap.user_id,
         content=snap.content,
-        likes=snap.likes,
+        likes=likes,
         shares=snap.shares,
         favs=snap.favs,
         created_at=snap.created_at,
