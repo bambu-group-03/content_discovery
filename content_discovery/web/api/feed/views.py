@@ -1,4 +1,3 @@
-import asyncio
 from typing import List, Optional
 
 from fastapi import APIRouter, HTTPException
@@ -23,31 +22,18 @@ from content_discovery.web.api.utils import (
     followed_users,
 )
 
-class BackgroundTask:
-    def __init__(self):
-        self.VAR = 0
-
-    async def my_task(self):
-        while 1:
-            self.VAR = 13 + self.VAR
-            await asyncio.sleep(1)
-        print("return")
-
-
-bgtask = BackgroundTask()
-
 router = APIRouter()
 
 NON_EXISTENT = 405
 OK = 200
 
 
-@router.on_event("startup")
-def on_startup():
-    bgtask.VAR = 13
-    print("Task Started")
-    asyncio.create_task(bgtask.my_task())
-    print("Task Created")
+# @router.on_event("startup")
+# def do_startup():
+# bgtask.VAR = 13
+# print("Task Started")
+# asyncio.create_task(bgtask.my_task())
+# print("Task Created")
 
 
 @router.post("/post", response_model=None)
@@ -59,14 +45,15 @@ async def post_snap(
 ) -> Optional[SnapsModel]:
     """Create a snap with the received content."""
     Privacy.validate(incoming_message.privacy)
-    print(bgtask.VAR)
     # create snap
     snap = await snaps_dao.create_snaps_model(
         user_id=incoming_message.user_id,
         content=incoming_message.content,
         privacy=incoming_message.privacy,
     )
+    from content_discovery.web.background_task import bgtask
 
+    print(bgtask.text)
     # Create hashtags and mentions
     await hashtag_dao.create_hashtags(snap.id, snap.content)
     await mention_dao.create_mentions(snap.id, snap.content)
