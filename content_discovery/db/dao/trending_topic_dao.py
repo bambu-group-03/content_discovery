@@ -1,4 +1,7 @@
+from typing import Optional
+
 from fastapi import Depends
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from content_discovery.db.dependencies import get_db_session
@@ -14,7 +17,7 @@ class TrendingTopicDAO:
     async def create_topic_model(
         self,
         name: str,
-    ) -> TrendingTopicModel:
+    ) -> Optional[TrendingTopicModel]:
         """
         Add single snap to session.
 
@@ -22,9 +25,20 @@ class TrendingTopicDAO:
         :param content
         :param privacy
         """
-        print("add_topic")
+        exists = await self.get_topic_from_name(name)
+        if exists:
+            return None
         topic = TrendingTopicModel(name=name)
         self.session.add(topic)
         await self.session.flush()
         await self.session.commit()
         return topic
+
+    async def get_topic_from_name(
+        self,
+        name: str,
+    ) -> Optional[TrendingTopicModel]:
+        """Get specific topic model."""
+        query = select(TrendingTopicModel).where(TrendingTopicModel.name == name)
+        rows = await self.session.execute(query)
+        return rows.scalars().first()

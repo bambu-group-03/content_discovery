@@ -22,6 +22,7 @@ class TrendingTopicModel(Base):
     name: Mapped[str] = mapped_column(String(length))
 
 
+# probablemente no se use esto
 class TrendingModel(Base):
     """Model for topic-snap relationship."""
 

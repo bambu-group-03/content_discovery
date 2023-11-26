@@ -21,7 +21,6 @@ from content_discovery.web.api.utils import (
     complete_snaps_and_shares,
     followed_users,
 )
-from content_discovery.web.background_task import bgtask
 
 router = APIRouter()
 
@@ -44,8 +43,6 @@ async def post_snap(
         content=incoming_message.content,
         privacy=incoming_message.privacy,
     )
-
-    print(bgtask.text)
     # Create hashtags and mentions
     await hashtag_dao.create_hashtags(snap.id, snap.content)
     await mention_dao.create_mentions(snap.id, snap.content)

@@ -25,12 +25,11 @@ def get_user_info(user_id: str) -> tuple[str, str, str]:
         return ("Unknown", "Unknown", "Unknown")
 
 
-def send_notification(title: str, content: str) -> str:
+def send_notification(title: str, content: str) -> httpx.Response:
     """Returns username and fullname of user."""
     url = _url_send_notification(title, content)
     message = {"message": f"{title}:{content}"}
-    response = httpx.post(url, json=message)
-    return response.json()["message"]
+    return httpx.post(url, json=message)
 
 
 def followed_users(user_id: str) -> List[Dict[str, str]]:
