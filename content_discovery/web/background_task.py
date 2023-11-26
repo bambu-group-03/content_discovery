@@ -1,13 +1,14 @@
 import asyncio
+import datetime
 from typing import Any
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from content_discovery.db.dao.hashtag_dao import HashtagDAO
 from content_discovery.db.dao.snaps_dao import SnapDAO
 from content_discovery.db.dao.trending_topic_dao import TrendingTopicDAO
-from content_discovery.db.dao.hashtag_dao import HashtagDAO
 from content_discovery.web.api.utils import send_notification
-import datetime
+
 
 class BackgroundTask:
     """Background process that continuously pings and handles trending topics"""
@@ -19,8 +20,8 @@ class BackgroundTask:
         self.session: AsyncSession
         self.running = True
         self.MAX_SNAPS = 10000
-        self.PERIOD_SECONDS = 10
-        
+        self.PERIOD_SECONDS = 3
+
     async def _parse_trending_topic_from_snaps(self, hashtag_dao, snap_dao, trend_dao):
         period_to_measure = datetime.timedelta(weeks=4)
         max_hashtags = 3
@@ -28,8 +29,6 @@ class BackgroundTask:
         self.text = str(snaps)
         if snaps:
             await trend_dao.create_topic_model(name=snaps[0].content)
-                
-                
 
     async def my_task(self, an_app: Any) -> None:
         """Handle trending topics background process"""

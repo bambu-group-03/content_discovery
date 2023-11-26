@@ -57,7 +57,11 @@ class HashtagDAO:
         return list(rows.scalars().fetchall())
 
     async def get_top_hashtags(self, period: datetime.timedelta, max: int):
-        query = select(HashtagModel.name, func.count(HashtagModel.name).label("count"))
-        query = query.group_by(HashtagModel.name)
+        cutoff_date = datetime.datetime(year=2022, month=1, day=1)
+        minimum_hashtag_count_to_be_a_trend = 4
+        query = select(HashtagModel.name, func.count(HashtagModel.name).label("count")) \
+            .where(HashtagModel.created_at > cutoff_date) \
+            .group_by(HashtagModel.name) \
+            .having(func.count(HashtagModel.name) >= minimum_hashtag_count_to_be_a_trend)
         rows = await self.session.execute(query)
         return list(rows.mappings().fetchall())
