@@ -1,9 +1,10 @@
+import datetime
 import re
 import uuid
 from typing import List
 
 from fastapi import Depends
-from sqlalchemy import select
+from sqlalchemy import RowMapping, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from content_discovery.constants import Visibility
@@ -18,7 +19,11 @@ class HashtagDAO:
     def __init__(self, session: AsyncSession = Depends(get_db_session)):
         self.session = session
 
-    async def create_hashtag_model(self, snap_id: uuid.UUID, hashtag: str) -> None:
+    async def create_hashtag_model(
+        self,
+        snap_id: uuid.UUID,
+        hashtag: str,
+    ) -> None:
         """Add single hashtag to session."""
         try:
             ht = HashtagModel(snap_id=snap_id, name=hashtag)
@@ -54,3 +59,18 @@ class HashtagDAO:
         rows = await self.session.execute(query)
 
         return list(rows.scalars().fetchall())
+
+    async def get_top_hashtags(
+        self,
+        cutoff_date: datetime.datetime,
+        minimum_hashtag_count: int,
+    ) -> List[RowMapping]:
+        """Get counts of the most common hashtags within a timeframe"""
+        query = select(HashtagModel.name, func.count(HashtagModel.name).label("count"))
+        query = query.where(HashtagModel.created_at > cutoff_date)
+        query = query.group_by(HashtagModel.name)
+        query = query.having(
+            func.count(HashtagModel.name) >= minimum_hashtag_count,
+        )
+        rows = await self.session.execute(query)
+        return list(rows.mappings().fetchall())

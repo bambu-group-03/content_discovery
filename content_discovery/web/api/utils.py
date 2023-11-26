@@ -25,6 +25,13 @@ def get_user_info(user_id: str) -> tuple[str, str, str]:
         return ("Unknown", "Unknown", "Unknown")
 
 
+def send_notification(title: str, content: str) -> httpx.Response:
+    """Returns username and fullname of user."""
+    url = _url_send_notification(title, content)
+    message = {"message": f"{title}:{content}"}
+    return httpx.post(url, json=message)
+
+
 def followed_users(user_id: str) -> List[Dict[str, str]]:
     """
     Returns a list of users that the user follows.
@@ -75,6 +82,10 @@ def _url_get_following(user_id: str) -> str:
 
 def _url_get_user(user_id: str) -> str:
     return f"{settings.identity_socializer_url}/api/auth/users/{user_id}"
+
+
+def _url_send_notification(title: str, content: str) -> str:
+    return f"{settings.identity_socializer_url}/api/echo/"
 
 
 async def complete_snaps(

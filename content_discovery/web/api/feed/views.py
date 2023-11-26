@@ -43,7 +43,6 @@ async def post_snap(
         content=incoming_message.content,
         privacy=incoming_message.privacy,
     )
-
     # Create hashtags and mentions
     await hashtag_dao.create_hashtags(snap.id, snap.content)
     await mention_dao.create_mentions(snap.id, snap.content)
