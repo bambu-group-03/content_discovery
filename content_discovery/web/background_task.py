@@ -5,8 +5,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from content_discovery.db.dao.snaps_dao import SnapDAO
 from content_discovery.db.dao.trending_topic_dao import TrendingTopicDAO
+from content_discovery.db.dao.hashtag_dao import HashtagDAO
 from content_discovery.web.api.utils import send_notification
-
+import datetime
 
 class BackgroundTask:
     """Background process that continuously pings and handles trending topics"""
@@ -18,28 +19,33 @@ class BackgroundTask:
         self.session: AsyncSession
         self.running = True
         self.MAX_SNAPS = 10000
+        self.PERIOD_SECONDS = 10
+        
+    async def _parse_trending_topic_from_snaps(self, hashtag_dao, snap_dao, trend_dao):
+        period_to_measure = datetime.timedelta(weeks=4)
+        max_hashtags = 3
+        snaps = await hashtag_dao.get_top_hashtags(period_to_measure, max_hashtags)
+        self.text = str(snaps)
+        if snaps:
+            await trend_dao.create_topic_model(name=snaps[0].content)
+                
+                
 
     async def my_task(self, an_app: Any) -> None:
         """Handle trending topics background process"""
-        print("task")
         self.app = an_app
         self.session = an_app.state.db_session_factory()
 
         snap_dao = SnapDAO(self.session)
         trend_dao = TrendingTopicDAO(self.session)
+        hashtag_dao = HashtagDAO(self.session)
 
         while self.running:
-            snaps = await snap_dao.get_all_snaps(self.MAX_SNAPS, 0)
-            self.text = str(snaps)
-            if snaps:
-                # topic = TrendingTopicModel(name=snaps[0].content)
-                # self.session.add(topic)
-                # await self.session.flush()
-                # await self.session.commit()
-                # await self.session.close()
-                await trend_dao.create_topic_model(name=snaps[0].content)
-                send_notification("Hey!", "This is a notification!")
-                await asyncio.sleep(10)
+            # await self._parse_trending_topic_from_snaps(hashtag_dao, snap_dao, trend_dao)
+            tags = await hashtag_dao.get_top_hashtags(None, None)
+            response = send_notification("Hey!", str(tags))
+            print(response)
+            await asyncio.sleep(self.PERIOD_SECONDS)
 
         print("return from task")
 

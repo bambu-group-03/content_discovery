@@ -25,7 +25,7 @@ def get_user_info(user_id: str) -> tuple[str, str, str]:
         return ("Unknown", "Unknown", "Unknown")
 
 
-def send_notification(title: str, content: str) -> None:
+def send_notification(title: str, content: str) -> str:
     """Returns username and fullname of user."""
     url = _url_send_notification(title, content)
     message = {"message": f"{title}:{content}"}

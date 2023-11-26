@@ -29,14 +29,6 @@ NON_EXISTENT = 405
 OK = 200
 
 
-# @router.on_event("startup")
-# def do_startup():
-# bgtask.VAR = 13
-# print("Task Started")
-# asyncio.create_task(bgtask.my_task())
-# print("Task Created")
-
-
 @router.post("/post", response_model=None)
 async def post_snap(
     incoming_message: PostSnap,

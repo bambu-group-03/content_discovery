@@ -1,9 +1,10 @@
+import datetime
 import re
 import uuid
 from typing import List
 
 from fastapi import Depends
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from content_discovery.constants import Visibility
@@ -54,3 +55,9 @@ class HashtagDAO:
         rows = await self.session.execute(query)
 
         return list(rows.scalars().fetchall())
+
+    async def get_top_hashtags(self, period: datetime.timedelta, max: int):
+        query = select(HashtagModel.name, func.count(HashtagModel.name).label("count"))
+        query = query.group_by(HashtagModel.name)
+        rows = await self.session.execute(query)
+        return list(rows.mappings().fetchall())
