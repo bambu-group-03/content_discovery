@@ -21,6 +21,7 @@ from content_discovery.web.api.utils import (
     complete_snaps_and_shares,
     followed_users,
 )
+from content_discovery.web.background_task import bgtask
 
 router = APIRouter()
 
@@ -51,7 +52,6 @@ async def post_snap(
         content=incoming_message.content,
         privacy=incoming_message.privacy,
     )
-    from content_discovery.web.background_task import bgtask
 
     print(bgtask.text)
     # Create hashtags and mentions

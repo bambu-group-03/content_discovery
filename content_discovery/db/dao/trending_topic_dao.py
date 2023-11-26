@@ -2,7 +2,6 @@ from fastapi import Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from content_discovery.db.dependencies import get_db_session
-from content_discovery.db.models.snaps_model import SnapsModel
 from content_discovery.db.models.trending_model import TrendingTopicModel
 
 
@@ -15,7 +14,7 @@ class TrendingTopicDAO:
     async def create_topic_model(
         self,
         name: str,
-    ) -> SnapsModel:
+    ) -> TrendingTopicModel:
         """
         Add single snap to session.
 
@@ -28,3 +27,4 @@ class TrendingTopicDAO:
         self.session.add(topic)
         await self.session.flush()
         await self.session.commit()
+        return topic
