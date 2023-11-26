@@ -65,10 +65,4 @@ def get_app() -> FastAPI:
         name="static",
     )
 
-    # background task on startup
-
-    from content_discovery.web.background_task import do_startup
-
-    do_startup(app)
-
     return app

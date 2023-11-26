@@ -58,6 +58,12 @@ def register_startup_event(
         _setup_db(app)
         setup_prometheus(app)
         app.middleware_stack = app.build_middleware_stack()
+        
+        
+        # background task on startup
+        from content_discovery.web.background_task import do_startup
+        do_startup(app)
+        
         pass  # noqa: WPS420
 
     return _startup
