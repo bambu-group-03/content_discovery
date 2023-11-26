@@ -4,7 +4,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from content_discovery.db.dao.snaps_dao import SnapDAO
 from content_discovery.db.dao.trending_topic_dao import TrendingTopicDAO
-
+from content_discovery.web.api.utils import send_notification
+import httpx
 
 class BackgroundTask:
     def __init__(self):
@@ -33,6 +34,7 @@ class BackgroundTask:
                 # await self.session.close()
                 await trend_dao.create_topic_model(name=snaps[0].content)
                 print("loopssss")
+                send_notification("Hey!", "This is a notification!")
                 await asyncio.sleep(10)
 
         print("return from task")
