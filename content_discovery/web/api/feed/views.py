@@ -1,3 +1,4 @@
+import datetime
 from typing import List, Optional
 
 from fastapi import APIRouter, HTTPException
@@ -210,3 +211,21 @@ async def get_snap_replies(
     snaps = await snaps_dao.get_snap_replies(snap_id, followed)
 
     return await complete_snaps(snaps, user_id, snaps_dao)
+
+
+# TODO: mover a metricas
+
+
+@router.get("/snaps/count_snaps/start/{start_datetime}/end/{end_datetime}")
+async def get_snap_count(
+    start_datetime: datetime.datetime,
+    end_datetime: datetime.datetime,
+    snaps_dao: SnapDAO = Depends(),
+) -> int:
+    """Returns number of snaps created in a time period."""
+    snapcounts = await snaps_dao.quantity_new_snaps_in_time_period(
+        start_datetime,
+        end_datetime,
+    )
+    print(snapcounts)
+    return snapcounts

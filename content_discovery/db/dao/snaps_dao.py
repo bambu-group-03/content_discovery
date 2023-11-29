@@ -1,8 +1,9 @@
+import datetime
 import uuid
 from typing import Any, Dict, List, Optional, Union
 
 from fastapi import Depends
-from sqlalchemy import Select, delete, or_, outerjoin, select, update
+from sqlalchemy import Select, delete, func, or_, outerjoin, select, update
 from sqlalchemy.engine.row import RowMapping
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql.functions import coalesce
@@ -446,6 +447,21 @@ class SnapDAO:
         query = query.where(SnapsModel.parent_id == snap_id)
         rows = await self.session.execute(query)
         return len(list(rows.scalars().fetchall()))
+
+    async def quantity_new_snaps_in_time_period(
+        self,
+        start: datetime.datetime,
+        end: datetime.datetime,
+    ) -> int:
+        """Get number of snaps in the given timeframe"""
+        start = start.replace(tzinfo=None)
+        end = end.replace(tzinfo=None)
+        query = select(func.count("*").label("count"))
+        query = query.where(SnapsModel.created_at > start)
+        query = query.where(SnapsModel.created_at < end)
+        rows = await self.session.execute(query)
+        count = rows.scalars().first()
+        return count if count else 0
 
 
 def _query_visibility_is_public(query: Any) -> Any:
