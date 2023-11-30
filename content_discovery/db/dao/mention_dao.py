@@ -68,7 +68,7 @@ class MentionDAO:
         query = query.where(MentionModel.mentioned_id == user_id)
 
         rows = await self.session.execute(query)
-
+        print(user_id)
         return list(rows.scalars().fetchall())
 
     def get_user_info_by_username(self, username: str) -> str:

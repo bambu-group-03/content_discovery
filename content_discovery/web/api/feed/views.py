@@ -9,6 +9,7 @@ from content_discovery.db.dao.hashtag_dao import HashtagDAO
 from content_discovery.db.dao.mention_dao import MentionDAO
 from content_discovery.db.dao.snaps_dao import SnapDAO
 from content_discovery.db.models.snaps_model import SnapsModel
+from content_discovery.services import Notification
 from content_discovery.web.api.feed.schema import (
     FeedPack,
     PostSnap,
@@ -48,7 +49,13 @@ async def post_snap(
     # Create hashtags and mentions
     await hashtag_dao.create_hashtags(snap.id, snap.content)
     await mention_dao.create_mentions(snap.id, snap.content)
-
+    snippet = incoming_message.content[:10]
+    content = f"{snippet}..."
+    Notification().send_notification(
+        incoming_message.user_id,
+        "You just got mentioned! - SnapMsg",
+        content,
+    )
     return snap
 
 
