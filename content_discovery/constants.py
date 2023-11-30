@@ -19,3 +19,11 @@ class Privacy(Enum):
         """Validates privacy"""
         if value not in {item.value for item in Privacy}:
             raise ValueError("Invalid privacy setting")
+
+
+class Frequency(Enum):
+    """Enum for periods of time to measure frequency of snap posting"""
+
+    per_minute = "per_minute"
+    hourly = "hourly"
+    daily = "daily"

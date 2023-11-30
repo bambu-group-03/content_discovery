@@ -4,7 +4,7 @@ from typing import List, Optional
 from fastapi import APIRouter, HTTPException
 from fastapi.param_functions import Depends
 
-from content_discovery.constants import Privacy
+from content_discovery.constants import Frequency, Privacy
 from content_discovery.db.dao.hashtag_dao import HashtagDAO
 from content_discovery.db.dao.mention_dao import MentionDAO
 from content_discovery.db.dao.snaps_dao import SnapDAO
@@ -26,6 +26,7 @@ from content_discovery.web.api.utils import (
 router = APIRouter()
 
 NON_EXISTENT = 405
+BAD_INPUT = 214
 OK = 200
 
 
@@ -216,7 +217,7 @@ async def get_snap_replies(
 # TODO: mover a metricas
 
 
-@router.get("/snaps/count_snaps/start/{start_datetime}/end/{end_datetime}")
+@router.get("/snaps/stats/start/{start_datetime}/end/{end_datetime}")
 async def get_snap_count(
     start_datetime: datetime.datetime,
     end_datetime: datetime.datetime,
@@ -227,5 +228,38 @@ async def get_snap_count(
         start_datetime,
         end_datetime,
     )
+    print(snapcounts)
+    return snapcounts
+
+
+@router.get("/snaps/stats/frequency/{frequency}/number_of_points/{number}")
+async def get_snap_frequencies(
+    frequency: Frequency,
+    number: int,
+    snaps_dao: SnapDAO = Depends(),
+) -> List[int]:
+    """Returns number of snaps created in a time period."""
+    if number <= 0:
+        raise HTTPException(status_code=BAD_INPUT, detail="Bad input")
+
+    snapcounts = []
+
+    if frequency is Frequency.hourly:
+        time_unit = datetime.timedelta(hours=1)
+    if frequency is Frequency.daily:
+        time_unit = datetime.timedelta(days=1)
+    if frequency is Frequency.per_minute:
+        time_unit = datetime.timedelta(minutes=1)
+    start_datetime = datetime.datetime.utcnow() - (time_unit * number)
+    for _ in range(0, number):
+        end_datetime = start_datetime + time_unit
+        print(start_datetime)
+        print(end_datetime)
+        count = await snaps_dao.quantity_new_snaps_in_time_period(
+            start_datetime,
+            end_datetime,
+        )
+        snapcounts.append(count)
+        start_datetime = end_datetime
     print(snapcounts)
     return snapcounts
