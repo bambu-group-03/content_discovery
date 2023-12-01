@@ -154,7 +154,7 @@ class SnapDAO:
 
     async def get_all_snaps(self, limit: int, offset: int) -> List[SnapsModel]:
         """
-        Get all dummy models with limit/offset pagination.
+        Get all snaps models with limit/offset pagination.
 
         :param limit: limit of snaps.
         :param offset: offset of snaps.

@@ -85,7 +85,7 @@ def _url_get_user(user_id: str) -> str:
 
 
 def _url_send_notification(title: str, content: str) -> str:
-    return f"{settings.identity_socializer_url}/api/echo/"
+    return f"{settings.identity_socializer_url}/api/notification/"
 
 
 async def complete_snaps(
