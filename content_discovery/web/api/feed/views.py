@@ -49,12 +49,9 @@ async def post_snap(
     # Create hashtags and mentions
     await hashtag_dao.create_hashtags(snap.id, snap.content)
     await mention_dao.create_mentions(snap.id, snap.content)
-    snippet = incoming_message.content[:10]
-    content = f"{snippet}..."
-    Notification().send_notification(
+    Notification().send_mention_notification(
         incoming_message.user_id,
-        "You just got mentioned! - SnapMsg",
-        content,
+        incoming_message.content,
     )
     return snap
 
