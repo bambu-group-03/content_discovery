@@ -3,6 +3,7 @@
 import httpx
 
 from content_discovery.settings import settings
+from content_discovery.web.api.utils import followers
 
 
 class Notification:
@@ -27,11 +28,14 @@ class Notification:
         content: str,
     ) -> None:
         """Send mention notification."""
-        title = "You got a mention!"
-        crop_to = 20
-        content = content[:crop_to]
-        content = f"{content}..."
-        return self.send_notification(mentioned_id, title, content)
+        list_of_followers = [follower["id"] for follower in followers(user_id)]
+        if mentioned_id in list_of_followers:
+            print("Sending notification...")
+            title = "You got a mention!"
+            crop_to = 20
+            content = content[:crop_to]
+            content = f"{content}..."
+            return self.send_notification(mentioned_id, title, content)
 
 
 def _url_post_notification() -> str:
