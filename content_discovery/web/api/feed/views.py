@@ -49,10 +49,14 @@ async def post_snap(
     # Create hashtags and mentions
     await hashtag_dao.create_hashtags(snap.id, snap.content)
     await mention_dao.create_mentions(snap.id, snap.content)
-    Notification().send_mention_notification(
-        incoming_message.user_id,
-        incoming_message.content,
-    )
+    mentions = await mention_dao.get_mentioned_users_in_snap(snap.id)
+    mentions_ids = [mention.mentioned_id for mention in mentions]
+    for mention_id in mentions_ids:
+        Notification().send_mention_notification(
+            incoming_message.user_id,
+            mention_id,
+            incoming_message.content,
+        )
     return snap
 
 

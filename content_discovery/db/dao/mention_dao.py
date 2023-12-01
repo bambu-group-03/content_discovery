@@ -71,6 +71,16 @@ class MentionDAO:
         print(user_id)
         return list(rows.scalars().fetchall())
 
+    async def get_mentioned_users_in_snap(
+        self,
+        snap_id: uuid.UUID,
+    ) -> List[MentionModel]:
+        """Get users that this snap mentioned."""
+        query = select(MentionModel)
+        query = query.where(MentionModel.snap_id == snap_id)
+        rows = await self.session.execute(query)
+        return list(rows.scalars().fetchall())
+
     def get_user_info_by_username(self, username: str) -> str:
         """Returns user_id from username."""
         try:

@@ -20,10 +20,18 @@ class Notification:
         except Exception as exc:
             print(str(exc))
 
-    def send_mention_notification(self, user_id: str,  content: str) -> None:
+    def send_mention_notification(
+        self,
+        user_id: str,
+        mentioned_id: str,
+        content: str,
+    ) -> None:
+        """Send mention notification."""
         title = "You got a mention!"
-        content = f"{content[:20]}..."
-        return self.send_notification(user_id, title, content)
+        crop_to = 20
+        content = content[:crop_to]
+        content = f"{content}..."
+        return self.send_notification(mentioned_id, title, content)
 
 
 def _url_post_notification() -> str:
