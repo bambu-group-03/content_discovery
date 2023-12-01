@@ -51,7 +51,8 @@ async def post_snap(
     await mention_dao.create_mentions(snap.id, snap.content)
     mentions = await mention_dao.get_mentioned_users_in_snap(snap.id)
     mentions_ids = [mention.mentioned_id for mention in mentions]
-    for mention_id in mentions_ids:
+    unique = list(dict.fromkeys(mentions_ids))
+    for mention_id in unique:
         Notification().send_mention_notification(
             incoming_message.user_id,
             mention_id,
