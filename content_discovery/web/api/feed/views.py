@@ -240,9 +240,32 @@ async def get_all_snaps(
     limit: int = 10,
     offset: int = 0,
     snaps_dao: SnapDAO = Depends(),
-) -> List[SnapsModel]:
+) -> None:
     """Returns a list of snaps"""
-    return await snaps_dao.get_all_snaps(limit=limit, offset=offset)
+    completed_snap = []
+    snaps = await snaps_dao.get_all_snaps(limit=limit, offset=offset)
+
+    for snap in snaps:
+        (username, fullname, url) = get_user_info(snap.user_id)
+
+        completed_snap.append(
+            {
+                "id": snap.id,
+                "user_id": snap.user_id,
+                "content": snap.content,
+                "likes": snap.likes,
+                "shares": snap.shares,
+                "favs": snap.favs,
+                "created_at": snap.created_at,
+                "username": username,
+                "fullname": fullname,
+                "parent_id": snap.parent_id,
+                "visibility": snap.visibility,
+                "privacy": snap.privacy,
+            },
+        )
+
+    return completed_snap
 
 
 @router.get("/get_replies")
