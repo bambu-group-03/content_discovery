@@ -22,6 +22,7 @@ from content_discovery.web.api.utils import (
     complete_snaps,
     complete_snaps_and_shares,
     followed_users,
+    get_user_info,
 )
 
 router = APIRouter()
@@ -198,6 +199,40 @@ async def get_snaps_from_user(
     followed = followed_users(user_id)
     snaps = await snaps_dao.get_from_user(user_id, followed, limit, offset)
     return await complete_snaps(snaps, user_id, snaps_dao)
+
+
+@router.get("/admin/{user_id}/snaps")
+async def get_snaps_from_user_by_admin(
+    user_id: str,
+    limit: int = 10,
+    offset: int = 0,
+    snaps_dao: SnapDAO = Depends(),
+) -> FeedPack:
+    """Returns a list of snap ids from user by admin."""
+    snaps = []
+
+    snap_models = await snaps_dao.get_from_user_by_admin(user_id, limit, offset)
+    for snap_model in snap_models:
+        (username, fullname, url) = get_user_info(snap_model.user_id)
+
+        snap = Snap(
+            id=snap_model.id,
+            author=snap_model.user_id,
+            content=snap_model.content,
+            likes=snap_model.likes,
+            shares=snap_model.shares,
+            favs=snap_model.favs,
+            created_at=snap_model.created_at,
+            username=username,
+            fullname=fullname,
+            parent_id=snap_model.parent_id,
+            visibility=snap_model.visibility,
+            privacy=snap_model.privacy,
+        )
+
+        snaps.append(snap)
+
+    return FeedPack(snaps=snaps)
 
 
 @router.get("/get_all_snaps", response_model=None)
