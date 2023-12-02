@@ -30,7 +30,7 @@ async def snap_rates(snaps_dao: SnapDAO = Depends()) -> Dict[str, str]:
     snapcounts_public = await snaps_dao.quantity_new_snaps_in_time_period(
         start=START_DATE,
         end=datetime.datetime.now(),
-        filter_only_public=True
+        filter_only_public=True,
     )
     return {
         "total_snaps": str(snapcounts),
