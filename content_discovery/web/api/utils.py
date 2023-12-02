@@ -29,7 +29,11 @@ def send_notification(title: str, content: str) -> httpx.Response:
     """Returns username and fullname of user."""
     url = _url_send_notification(title, content)
     message = {"message": f"{title}:{content}"}
-    return httpx.post(url, json=message)
+    try:
+        return httpx.post(url, json=message)
+    except:
+        print("Could not send notification")
+        print(message)
 
 
 def followed_users(user_id: str) -> List[Dict[str, str]]:
