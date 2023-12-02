@@ -168,8 +168,9 @@ async def complete_snap_and_share(
     has_liked = await snaps_dao.user_has_liked(user_id, snap["SnapsModel"].id)
     num_replies = await snaps_dao.count_replies_by_snap(snap["SnapsModel"].id)
     can_see_likes = is_mutuals_or_equal(user_id, snap["SnapsModel"].user_id)
-    likes = snap["SnapsModel"].likes if can_see_likes else None
 
+    likes = snap["SnapsModel"].likes if can_see_likes else None
+    (username, fullname, url) = get_user_info(snap["SnapsModel"].user_id)
     if snap["ShareModel"]:
         (username, fullname, url) = get_user_info(snap["ShareModel"].user_id)
         was_shared_by = [username] if username else []
