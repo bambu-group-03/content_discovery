@@ -404,7 +404,7 @@ class SnapDAO:
             ),
         )
         query = query.order_by(
-            coalesce(SnapsModel.created_at, ShareModel.created_at).desc(),
+            coalesce(ShareModel.created_at, SnapsModel.created_at).desc(),
         )
 
         result = await self.session.execute(query.limit(limit).offset(offset))
