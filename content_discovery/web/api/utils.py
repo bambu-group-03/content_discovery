@@ -170,7 +170,7 @@ async def complete_snap_and_share(
     can_see_likes = is_mutuals_or_equal(user_id, snap["SnapsModel"].user_id)
 
     likes = snap["SnapsModel"].likes if can_see_likes else None
-    (username, fullname, url) = get_user_info(snap["SnapsModel"].user_id)
+    (username_author, fullname_author, url_author) = get_user_info(snap["SnapsModel"].user_id)
     if snap["ShareModel"]:
         (username, fullname, url) = get_user_info(snap["ShareModel"].user_id)
         was_shared_by = [username] if username else []
@@ -186,14 +186,14 @@ async def complete_snap_and_share(
         shares=snap.shares,
         favs=snap.favs,
         created_at=snap.created_at,
-        username=username,
-        fullname=fullname,
+        username=username_author,
+        fullname=fullname_author,
         parent_id=snap.parent_id,
         visibility=snap.visibility,
         privacy=snap.privacy,
         num_replies=num_replies,
         has_shared=has_shared,
         has_liked=has_liked,
-        profile_photo_url=url,
+        profile_photo_url=url_author,
         is_shared_by=was_shared_by,
     )
