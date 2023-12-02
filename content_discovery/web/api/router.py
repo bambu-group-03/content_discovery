@@ -1,6 +1,13 @@
 from fastapi.routing import APIRouter
 
-from content_discovery.web.api import docs, feed, filter, interactions, monitoring, metrics
+from content_discovery.web.api import (
+    docs,
+    feed,
+    filter,
+    interactions,
+    metrics,
+    monitoring,
+)
 
 api_router = APIRouter()
 api_router.include_router(monitoring.router)

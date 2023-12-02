@@ -1,9 +1,14 @@
-from fastapi import APIRouter, Depends
-from typing import Dict
-from content_discovery.db.dao.snaps_dao import SnapDAO
 import datetime
+from typing import Dict
+
+from fastapi import APIRouter, Depends
+
+from content_discovery.db.dao.snaps_dao import SnapDAO
 
 router = APIRouter()
+
+START_YEAR = 1970
+START_DATE = datetime.datetime(START_YEAR, 1, 1, 1, 1, 1)
 
 
 @router.get("/health")
@@ -14,15 +19,13 @@ def health_check() -> None:
     It returns 200 if the project is healthy.
     """
 
-@router.get("/get_snap_rates",  response_model=None)
+
+@router.get("/get_snap_rates", response_model=None)
 async def snap_rates(snaps_dao: SnapDAO = Depends()) -> Dict[str, str]:
-    """
-    Checks the health of a project.
-    It returns 200 if the project is healthy.
-    """
+    """Get snap rates for public and private snaps."""
     snapcounts = await snaps_dao.quantity_new_snaps_in_time_period(
-        start=datetime.datetime(1970,1,1,1,1,1),
-        end=datetime.datetime.now()
+        start=START_DATE,
+        end=datetime.datetime.now(),
     )
     return {
         "total_snaps": str(snapcounts),
