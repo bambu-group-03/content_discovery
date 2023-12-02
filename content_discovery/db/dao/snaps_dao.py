@@ -200,6 +200,20 @@ class SnapDAO:
         rows = await self.session.execute(query)
         return list(rows.scalars().fetchall())
 
+    async def get_from_user_by_admin(
+        self,
+        user_id: str,
+        limit: int,
+        offset: int,
+    ) -> list[SnapsModel]:
+        """Get snaps from user by admin"""
+        query = select(SnapsModel)
+        query = query.where(SnapsModel.user_id == user_id)
+        query = query.limit(limit).offset(offset)
+        rows = await self.session.execute(query)
+
+        return list(rows.scalars().fetchall())
+
     async def increase_likes(
         self,
         snap_id: str,
