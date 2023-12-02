@@ -8,7 +8,7 @@ from sqlalchemy.engine.row import RowMapping
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.sql.functions import coalesce
 
-from content_discovery.constants import Visibility
+from content_discovery.constants import Visibility, Privacy
 from content_discovery.db.dependencies import get_db_session
 from content_discovery.db.models.fav_model import FavModel
 from content_discovery.db.models.hashtag_model import HashtagModel
@@ -452,6 +452,7 @@ class SnapDAO:
         self,
         start: datetime.datetime,
         end: datetime.datetime,
+        filter_only_public: bool = False,
     ) -> int:
         """Get number of snaps in the given timeframe"""
         start = start.replace(tzinfo=None)
@@ -459,15 +460,19 @@ class SnapDAO:
         query = select(func.count("*").label("count"))
         query = query.where(SnapsModel.created_at > start)
         query = query.where(SnapsModel.created_at < end)
+        if filter_only_public:
+            query = _query_privacy_is_public(query)
         rows = await self.session.execute(query)
         count = rows.scalars().first()
         return count if count else 0
-
 
 def _query_visibility_is_public(query: Any) -> Any:
     """Snap visibility is public"""
     return query.where(SnapsModel.visibility == Visibility.PUBLIC.value)
 
+def _query_privacy_is_public(query: Any) -> Any:
+    """Snap privacy is public"""
+    return query.where(SnapsModel.privacy == Privacy.PUBLIC.value)
 
 def _default_visibility() -> int:
     return Visibility.PUBLIC.value
