@@ -1,42 +1,54 @@
 """Services for content_discovery."""
 
+
 import httpx
 
 from content_discovery.settings import settings
-from content_discovery.web.api.utils import followers
 
 
 class Notification:
     """Send notifications."""
 
-    def send_notification(self, user_id: str, title: str, content: str) -> None:
-        """Send notification."""
+    def send_mention_notification(
+        self,
+        from_id: str,
+        to_id: str,
+        snap_id: str,
+    ) -> None:
+        """Send mention notification."""
         json_params = {
-            "user_id": user_id,
-            "title": title,
-            "content": content,
+            "from_id": from_id,
+            "to_id": to_id,
+            "snap_id": snap_id,
         }
+
         try:
-            httpx.post(_url_post_notification(), json=json_params)
+            httpx.post(_url_post_mention_notification(), json=json_params)
         except Exception as exc:
             print(str(exc))
 
-    def send_mention_notification(
+    def send_like_notification(
         self,
-        user_id: str,
-        mentioned_id: str,
-        content: str,
+        from_id: str,
+        to_id: str,
+        snap_id: str,
     ) -> None:
-        """Send mention notification."""
-        list_of_followers = [follower["id"] for follower in followers(user_id)]
-        if mentioned_id in list_of_followers:
-            print("Sending notification...")
-            title = "You got a mention!"
-            crop_to = 20
-            content = content[:crop_to]
-            content = f"{content}..."
-            return self.send_notification(mentioned_id, title, content)
+        """Send like notification."""
+        json_params = {
+            "from_id": from_id,
+            "to_id": to_id,
+            "snap_id": snap_id,
+        }
+
+        try:
+            httpx.post(_url_post_like_notification(), json=json_params)
+        except Exception as exc:
+            print(str(exc))
 
 
-def _url_post_notification() -> str:
-    return f"{settings.identity_socializer_url}/api/notification/"
+def _url_post_mention_notification() -> str:
+    return f"{settings.identity_socializer_url}/api/notification/new_mention"
+
+
+def _url_post_like_notification() -> str:
+    return f"{settings.identity_socializer_url}/api/notification/new_like"

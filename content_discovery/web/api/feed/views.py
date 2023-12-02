@@ -54,9 +54,9 @@ async def post_snap(
     unique = list(dict.fromkeys(mentions_ids))
     for mention_id in unique:
         Notification().send_mention_notification(
-            incoming_message.user_id,
-            mention_id,
-            incoming_message.content,
+            from_id=incoming_message.user_id,
+            to_id=mention_id,
+            snap_id=str(snap.id),
         )
     return snap
 
