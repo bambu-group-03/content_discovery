@@ -305,18 +305,17 @@ async def get_snap_frequencies(
     frequency: Frequency,
     number: int,
     snaps_dao: SnapDAO = Depends(),
-) -> Dict[str, int]:
+) -> List[int]:
     """Returns number of snaps created in a time period."""
     if number <= 0:
         raise HTTPException(status_code=BAD_INPUT, detail="Bad input")
 
-    snapcounts = {}
+    snapcounts = []
 
     time_units = {
         Frequency.hourly: datetime.timedelta(hours=1),
         Frequency.daily: datetime.timedelta(days=1),
         Frequency.per_minute: datetime.timedelta(minutes=1),
-        Frequency.monthly: datetime.timedelta(days=DAYS_MONTH),
     }
 
     time_unit = time_units[frequency]
@@ -330,7 +329,42 @@ async def get_snap_frequencies(
             start_datetime,
             end_datetime,
         )
-        snapcounts[str(start_datetime.date())] = count
+        snapcounts.append(count)
         start_datetime = end_datetime
     print(snapcounts)
     return snapcounts
+
+@router.get("/snaps/stats/monthly_frequency/number_of_points/{number}")
+async def get_snap_frequencies(
+    frequency: Frequency,
+    number: int,
+    snaps_dao: SnapDAO = Depends(),
+) -> Dict[str, int]:
+    """Returns number of snaps created in a time period."""
+    if number <= 0:
+        raise HTTPException(status_code=BAD_INPUT, detail="Bad input")
+
+    snapcounts = {}
+
+    time_units = {
+        Frequency.hourly: datetime.timedelta(hours=1),
+        Frequency.daily: datetime.timedelta(days=1),
+        Frequency.per_minute: datetime.timedelta(minutes=1),
+    }
+
+    time_unit = time_units[frequency]
+
+    start_datetime = datetime.datetime.utcnow() - (time_unit * number)
+    for _ in range(0, number):
+        end_datetime = start_datetime + time_unit
+        print(start_datetime)
+        print(end_datetime)
+        count = await snaps_dao.quantity_new_snaps_in_time_period(
+            start_datetime,
+            end_datetime,
+        )
+        snapcounts.append(count)
+        start_datetime = end_datetime
+    print(snapcounts)
+    return snapcounts
+
