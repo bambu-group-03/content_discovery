@@ -1,5 +1,5 @@
 import datetime
-from typing import Any, List, Optional
+from typing import Any, List, Optional, Dict
 
 from fastapi import APIRouter, HTTPException
 from fastapi.param_functions import Depends
@@ -305,12 +305,12 @@ async def get_snap_frequencies(
     frequency: Frequency,
     number: int,
     snaps_dao: SnapDAO = Depends(),
-) -> List[int]:
+) -> Dict[str, int]:
     """Returns number of snaps created in a time period."""
     if number <= 0:
         raise HTTPException(status_code=BAD_INPUT, detail="Bad input")
 
-    snapcounts = []
+    snapcounts = {}
 
     time_units = {
         Frequency.hourly: datetime.timedelta(hours=1),
@@ -330,7 +330,7 @@ async def get_snap_frequencies(
             start_datetime,
             end_datetime,
         )
-        snapcounts.append(count)
+        snapcounts[str(start_datetime.date())] = count
         start_datetime = end_datetime
     print(snapcounts)
     return snapcounts
