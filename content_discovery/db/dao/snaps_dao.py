@@ -349,6 +349,18 @@ class SnapDAO:
 
         return list(rows.scalars().fetchall())
 
+    async def admin_filter_snaps(
+        self,
+        content: str,
+    ) -> List[SnapsModel]:
+        """Get list of filtered snaps by content."""
+        query = select(SnapsModel)
+        query = query.filter(SnapsModel.content.ilike(f"%{content}%"))
+
+        rows = await self.session.execute(query)
+
+        return list(rows.scalars().fetchall())
+
     async def get_shared_snaps(
         self,
         user_ids: List[str],
