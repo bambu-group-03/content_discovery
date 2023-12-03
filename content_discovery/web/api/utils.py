@@ -208,7 +208,7 @@ async def generate_freqencies(
             start_datetime,
             end_datetime,
         )
-        date_string = start_datetime.strftime("%B %Y")
+        date_string = end_datetime.strftime("%B %Y")
         snapcounts[date_string] = count
         start_datetime = end_datetime
     print(snapcounts)

@@ -341,7 +341,7 @@ async def get_snap_frequencies(
     snaps_dao: SnapDAO = Depends(),
 ) -> List[Dict[str, str]]:
     """Returns snaps created in recent months."""
-    dict_dates = await generate_freqencies(snaps_dao, datetime.timedelta(days=DAYS_MONTH), 4)
+    dict_dates = await generate_freqencies(snaps_dao, datetime.timedelta(days=DAYS_MONTH), 5)
     return_list = []
     for date, count in dict_dates.items():
         return_list.append({"month": date, "value": str(count)})
