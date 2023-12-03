@@ -29,11 +29,7 @@ def send_notification(title: str, content: str) -> httpx.Response:
     """Returns username and fullname of user."""
     url = _url_send_notification(title, content)
     message = {"message": f"{title}:{content}"}
-    try:
-        return httpx.post(url, json=message)
-    except:
-        print("Could not send notification")
-        print(message)
+    return httpx.post(url, json=message)
 
 
 def followed_users(user_id: str) -> List[Dict[str, str]]:
@@ -170,7 +166,9 @@ async def complete_snap_and_share(
     can_see_likes = is_mutuals_or_equal(user_id, snap["SnapsModel"].user_id)
 
     likes = snap["SnapsModel"].likes if can_see_likes else None
-    (username_author, fullname_author, url_author) = get_user_info(snap["SnapsModel"].user_id)
+    (username_author, fullname_author, url_author) = get_user_info(
+        snap["SnapsModel"].user_id,
+    )
     if snap["ShareModel"]:
         (username, fullname, url) = get_user_info(snap["ShareModel"].user_id)
         was_shared_by = [username] if username else []

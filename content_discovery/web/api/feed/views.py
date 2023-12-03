@@ -1,5 +1,5 @@
 import datetime
-from typing import List, Optional
+from typing import Any, List, Optional
 
 from fastapi import APIRouter, HTTPException
 from fastapi.param_functions import Depends
@@ -240,7 +240,7 @@ async def get_all_snaps(
     limit: int = 10,
     offset: int = 0,
     snaps_dao: SnapDAO = Depends(),
-) -> None:
+) -> List[Any]:
     """Returns a list of snaps"""
     completed_snap = []
     snaps = await snaps_dao.get_all_snaps(limit=limit, offset=offset)
