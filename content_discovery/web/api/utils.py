@@ -1,5 +1,5 @@
 from typing import Dict, List
-
+import datetime
 import httpx
 from sqlalchemy.engine.row import RowMapping
 
@@ -195,3 +195,21 @@ async def complete_snap_and_share(
         profile_photo_url=url_author,
         is_shared_by=was_shared_by,
     )
+
+async def generate_freqencies(
+    snaps_dao: SnapDAO, time_unit: datetime.timedelta, number: int) -> List[Dict[str, str]]:
+    snapcounts = {}
+    start_datetime = datetime.datetime.utcnow() - (time_unit * number)
+    for _ in range(0, number):
+        end_datetime = start_datetime + time_unit
+        print(start_datetime)
+        print(end_datetime)
+        count = await snaps_dao.quantity_new_snaps_in_time_period(
+            start_datetime,
+            end_datetime,
+        )
+        date_string = start_datetime.strftime("%B %Y")
+        snapcounts[date_string] = count
+        start_datetime = end_datetime
+    print(snapcounts)
+    return snapcounts
