@@ -415,6 +415,7 @@ class SnapDAO:
                 ShareModel.user_id.in_(user_ids),
             ),
         )
+        query = _query_privacy_filter_to_only_followers(query, requester_is_following)
         query = query.order_by(
             coalesce(ShareModel.created_at, SnapsModel.created_at).desc(),
         )
