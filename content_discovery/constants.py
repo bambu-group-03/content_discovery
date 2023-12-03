@@ -27,3 +27,4 @@ class Frequency(Enum):
     per_minute = "per_minute"
     hourly = "hourly"
     daily = "daily"
+    monthly = "monthly"

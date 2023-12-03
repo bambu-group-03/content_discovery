@@ -30,6 +30,7 @@ router = APIRouter()
 NON_EXISTENT = 405
 BAD_INPUT = 214
 OK = 200
+DAYS_MONTH = 30
 
 
 @router.post("/post", response_model=None)
@@ -311,12 +312,15 @@ async def get_snap_frequencies(
 
     snapcounts = []
 
-    if frequency is Frequency.hourly:
-        time_unit = datetime.timedelta(hours=1)
-    if frequency is Frequency.daily:
-        time_unit = datetime.timedelta(days=1)
-    if frequency is Frequency.per_minute:
-        time_unit = datetime.timedelta(minutes=1)
+    time_units = {
+        Frequency.hourly: datetime.timedelta(hours=1),
+        Frequency.daily: datetime.timedelta(days=1),
+        Frequency.per_minute: datetime.timedelta(minutes=1),
+        Frequency.monthly: datetime.timedelta(days=DAYS_MONTH),
+    }
+
+    time_unit = time_units[frequency]
+
     start_datetime = datetime.datetime.utcnow() - (time_unit * number)
     for _ in range(0, number):
         end_datetime = start_datetime + time_unit
