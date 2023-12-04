@@ -536,12 +536,14 @@ class SnapDAO:
             period_share += snap_in_period.shares
 
         return [
-            {"total_snaps": total_snaps},
-            {"total_likes": total_likes},
-            {"total_shares": total_shares},
-            {"period_snaps": period_snap},
-            {"period_likes": period_like},
-            {"period_shares": period_share},
+            {
+                "total_snaps": total_snaps,
+                "total_likes": total_likes,
+                "total_shares": total_shares,
+                "period_snaps": period_snap,
+                "period_likes": period_like,
+                "period_shares": period_share,
+            },
         ]
 
 
