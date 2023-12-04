@@ -13,7 +13,7 @@ deploy:
   - path: /
     service: api
     port: 9000
-  - path: /
+  - path: /db
     service: pgadmin
     port: 5050
 namespace: content-discovery-luiscusihuaman
