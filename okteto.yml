@@ -13,4 +13,7 @@ deploy:
   - path: /
     service: api
     port: 9000
+  - path: /
+    service: db
+    port: 5432
 namespace: content-discovery-luiscusihuaman

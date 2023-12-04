@@ -1,4 +1,4 @@
-name: Testing content_discovery
+name: CICD for content_discovery
 
 on: push
 
@@ -77,7 +77,7 @@ jobs:
       env:
         CONTENT_DISCOVERY_HOST: "0.0.0.0"
         CONTENT_DISCOVERY_DB_HOST: localhost
-  devflow:
+  deploy:
     runs-on: ubuntu-latest
     steps:
     - name: checkout
