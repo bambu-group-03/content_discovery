@@ -9,7 +9,7 @@ from content_discovery.db.dao.hashtag_dao import HashtagDAO
 from content_discovery.db.dao.mention_dao import MentionDAO
 from content_discovery.db.dao.snaps_dao import SnapDAO
 from content_discovery.db.models.snaps_model import SnapsModel
-from content_discovery.services import Notification
+from content_discovery.notifications import Notifications
 from content_discovery.web.api.feed.schema import (
     FeedPack,
     PostSnap,
@@ -56,10 +56,11 @@ async def post_snap(
     mentions_ids = [mention.mentioned_id for mention in mentions]
     unique = list(dict.fromkeys(mentions_ids))
     for mention_id in unique:
-        Notification().send_mention_notification(
+        await Notifications().send_mention_notification(
             from_id=incoming_message.user_id,
             to_id=mention_id,
-            snap_id=str(snap.id),
+            snap_id=snap.id,
+            snap_dao=snaps_dao,
         )
     return snap
 

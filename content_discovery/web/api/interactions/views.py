@@ -6,7 +6,7 @@ from content_discovery.db.dao.like_dao import LikeDAO
 from content_discovery.db.dao.mention_dao import MentionDAO
 from content_discovery.db.dao.share_dao import ShareDAO
 from content_discovery.db.dao.snaps_dao import SnapDAO
-from content_discovery.services import Notification
+from content_discovery.notifications import Notifications
 from content_discovery.web.api.feed.schema import FeedPack
 from content_discovery.web.api.utils import complete_snaps
 
@@ -31,10 +31,11 @@ async def like_snap(
     await snap_dao.increase_likes(snap_id)
 
     # send new like notification
-    Notification().send_like_notification(
+    await Notifications().send_like_notification(
         from_id=user_id,
         to_id=user_id,
         snap_id=snap_id,
+        snap_dao=snap_dao,
     )
 
 
