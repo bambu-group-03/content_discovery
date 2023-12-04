@@ -27,7 +27,7 @@ class Notification:
         except Exception as exc:
             print(str(exc))
 
-    async def send_like_notification(
+    def send_like_notification(
         self,
         from_id: str,
         to_id: str,
@@ -37,11 +37,16 @@ class Notification:
         json_params = {
             "from_id": from_id,
             "to_id": to_id,
-            "snap_id": snap_id,
+            "snap_id": snap_id,            
         }
 
+        timeout = httpx.Timeout(5.0, read=5.0)
+        
         try:
-            await httpx.post(_url_post_like_notification(), json=json_params)
+            # # Use AsyncClient for making asynchronous requests
+            # async with AsyncClient(timeout=timeout) as client:
+                # await client.post(_url_post_like_notification(), json=json_params)
+            httpx.post(_url_post_like_notification(), json=json_params, timeout=timeout)
         except Exception as exc:
             print(str(exc))
 
