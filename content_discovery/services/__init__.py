@@ -27,7 +27,7 @@ class Notification:
         except Exception as exc:
             print(str(exc))
 
-    def send_like_notification(
+    async def send_like_notification(
         self,
         from_id: str,
         to_id: str,
@@ -41,7 +41,7 @@ class Notification:
         }
 
         try:
-            httpx.post(_url_post_like_notification(), json=json_params)
+            await httpx.post(_url_post_like_notification(), json=json_params)
         except Exception as exc:
             print(str(exc))
 
