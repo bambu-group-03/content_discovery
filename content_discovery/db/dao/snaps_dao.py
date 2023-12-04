@@ -493,6 +493,57 @@ class SnapDAO:
         count = rows.scalars().first()
         return count if count else 0
 
+    async def get_snap_metrics_by_user(
+        self,
+        user_id: str,
+        start_date: str,
+        end_date: str,
+    ) -> Any:
+        """Get snap metrics by user in a given timeframe"""
+        try:
+            start = datetime.datetime.strptime(start_date, "%Y-%m-%d")
+            end = datetime.datetime.strptime(end_date, "%Y-%m-%d")
+        except ValueError:
+            return []
+
+        res = await self.session.execute(
+            select(SnapsModel).where(SnapsModel.user_id == user_id),
+        )
+
+        snaps_by_user = res.scalars().fetchall()
+
+        total_snaps = len(snaps_by_user)
+        total_likes = 0
+        total_shares = 0
+
+        for snap_by_user in snaps_by_user:
+            total_likes += snap_by_user.likes
+            total_shares += snap_by_user.shares
+
+        snaps_in_period = list(
+            filter(
+                lambda snap: snap.created_at >= start and snap.created_at <= end,
+                snaps_by_user,
+            ),
+        )
+
+        period_snap = len(snaps_in_period)
+        period_like = 0
+        period_share = 0
+
+        for snap_in_period in snaps_in_period:
+            period_like += snap_in_period.likes
+            period_share += snap_in_period.shares
+
+        return [
+            {"total_snaps": total_snaps},
+            {"total_likes": total_likes},
+            {"total_shares": total_shares},
+            {"period_snaps": period_snap},
+            {"period_likes": period_like},
+            {"period_shares": period_share},
+        ]
+
 
 def _query_visibility_is_public(query: Any) -> Any:
     """Snap visibility is public"""

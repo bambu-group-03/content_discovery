@@ -1,5 +1,5 @@
 import datetime
-from typing import Dict
+from typing import Any, Dict
 
 from fastapi import APIRouter, Depends
 
@@ -37,3 +37,21 @@ async def snap_rates(snaps_dao: SnapDAO = Depends()) -> Dict[str, str]:
         "private_snaps": str(snapcounts - snapcounts_public),
         "public_snaps": str(snapcounts_public),
     }
+
+
+@router.get(
+    "/{user_id}/get_user_metrics_between_{start_date}_and_{end_date}",
+    response_model=None,
+)
+async def get_user_metrics(
+    user_id: str,
+    start_date: str,
+    end_date: str,
+    snaps_dao: SnapDAO = Depends(),
+) -> Any:
+    """Returns metrics for a user in a time period."""
+    return await snaps_dao.get_snap_metrics_by_user(
+        user_id=user_id,
+        start_date=start_date,
+        end_date=end_date,
+    )
