@@ -1,5 +1,5 @@
 import datetime
-from typing import Any, Dict, List, Optional
+from typing import Any, List, Optional
 
 from fastapi import APIRouter, HTTPException
 from fastapi.param_functions import Depends
@@ -22,8 +22,8 @@ from content_discovery.web.api.utils import (
     complete_snaps,
     complete_snaps_and_shares,
     followed_users,
-    get_user_info,
     generate_freqencies,
+    get_user_info,
 )
 
 router = APIRouter()
@@ -311,7 +311,6 @@ async def get_snap_frequencies(
     if number <= 0:
         raise HTTPException(status_code=BAD_INPUT, detail="Bad input")
 
-
     time_units = {
         Frequency.hourly: datetime.timedelta(hours=1),
         Frequency.daily: datetime.timedelta(days=1),
@@ -319,7 +318,6 @@ async def get_snap_frequencies(
     }
 
     time_unit = time_units[frequency]
-
 
     snapcounts = []
     start_datetime = datetime.datetime.utcnow() - (time_unit * number)
@@ -336,14 +334,18 @@ async def get_snap_frequencies(
     print(snapcounts)
     return snapcounts
 
+
 @router.get("/snaps/stats/monthly_frequency")
-async def get_snap_frequencies(
+async def get_snap_frequencies_redefinition(
     snaps_dao: SnapDAO = Depends(),
-) -> List[Dict[str, str]]:
+) -> Any:
     """Returns snaps created in recent months."""
-    dict_dates = await generate_freqencies(snaps_dao, datetime.timedelta(days=DAYS_MONTH), 5)
+    dict_dates = await generate_freqencies(
+        snaps_dao,
+        datetime.timedelta(days=DAYS_MONTH),
+        5,
+    )
     return_list = []
     for date, count in dict_dates.items():
         return_list.append({"month": date, "value": str(count)})
     return return_list
-
