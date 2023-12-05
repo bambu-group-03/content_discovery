@@ -8,6 +8,7 @@ from content_discovery.db.dao.hashtag_dao import HashtagDAO
 from content_discovery.db.dao.trending_topic_dao import TrendingTopicDAO
 from content_discovery.notifications import Notifications
 
+
 class BackgroundTask:
     """Background process that continuously pings and handles trending topics"""
 

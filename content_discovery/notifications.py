@@ -66,7 +66,11 @@ class Notifications:
         timeout = httpx.Timeout(5.0, read=5.0)
 
         try:
-            httpx.post(_url_post_trending_notification(), json=json_params, timeout=timeout)
+            httpx.post(
+                _url_post_trending_notification(),
+                json=json_params,
+                timeout=timeout,
+            )
         except Exception as exc:
             print(str(exc))
 
