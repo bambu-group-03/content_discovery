@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import List, Optional
 
 from fastapi import Depends
 from sqlalchemy import select
@@ -42,3 +42,11 @@ class TrendingTopicDAO:
         query = select(TrendingTopicModel).where(TrendingTopicModel.name == name)
         rows = await self.session.execute(query)
         return rows.scalars().first()
+
+    async def get_all_topics(
+        self,
+    ) -> List[TrendingTopicModel]:
+        """Get all trending topic models."""
+        query = select(TrendingTopicModel)
+        rows = await self.session.execute(query)
+        return list(rows.scalars().all())
