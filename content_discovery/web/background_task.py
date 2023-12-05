@@ -6,8 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from content_discovery.db.dao.hashtag_dao import HashtagDAO
 from content_discovery.db.dao.trending_topic_dao import TrendingTopicDAO
-from content_discovery.web.api.utils import send_notification
-
+from content_discovery.notifications import Notifications
 
 class BackgroundTask:
     """Background process that continuously pings and handles trending topics"""
@@ -47,12 +46,8 @@ class BackgroundTask:
 
     async def _send_notification(self, new_tags: List[Any]) -> None:
         first_tag = max(new_tags, key=lambda tag: tag["count"])
-        response = send_notification(
-            f"Trending:{first_tag['name']}",
-            f"{first_tag['count']} people are tweeting about this!",
-        )
-        if not response.is_success:
-            print("Error sending notification")
+        print("sending trending notif")
+        await Notifications().send_trending_notification(first_tag)
 
     async def _store(self, tags: List[Any], trend_dao: TrendingTopicDAO) -> List[Any]:
         new_tags = []

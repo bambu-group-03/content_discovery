@@ -53,6 +53,23 @@ class Notifications:
         except Exception as exc:
             print(str(exc))
 
+    async def send_trending_notification(
+        self,
+        topic: str,
+    ) -> None:
+        """Send trending notification."""
+        json_params = {
+            "topic": topic,
+        }
+        print(f"params trending: {json_params}")
+
+        timeout = httpx.Timeout(5.0, read=5.0)
+
+        try:
+            httpx.post(_url_post_trending_notification(), json=json_params, timeout=timeout)
+        except Exception as exc:
+            print(str(exc))
+
 
 async def _format_snap(snap_id: Any, snap_dao: SnapDAO) -> Any:
     snap = await snap_dao.get_snap_from_id(snap_id)
@@ -90,3 +107,8 @@ def _url_post_mention_notification() -> str:
 def _url_post_like_notification() -> str:
     print(f"{settings.identity_socializer_url}/api/notification/new_like")
     return f"{settings.identity_socializer_url}/api/notification/new_like"
+
+
+def _url_post_trending_notification() -> str:
+    print(f"{settings.identity_socializer_url}/api/notification/new_trending")
+    return f"{settings.identity_socializer_url}/api/notification/new_trending"
