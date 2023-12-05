@@ -9,13 +9,13 @@ services:
     image: content_discovery:${CONTENT_DISCOVERY_VERSION:-latest}
     restart: always
     env_file:
-      - ../.env.remote
+    - ../.env.remote
     depends_on:
       db:
         condition: service_healthy
     ports:
       # Exposes application port.
-      - "9000:9000"
+    - "9000:9000"
     environment:
       CONTENT_DISCOVERY_HOST: 0.0.0.0
       CONTENT_DISCOVERY_DB_HOST: db
@@ -30,9 +30,9 @@ services:
       PGADMIN_DEFAULT_EMAIL: "admin@admin.com"
       PGADMIN_DEFAULT_PASSWORD: "admin"
     ports:
-      - "5050:80"
+    - "5050:80"
     depends_on:
-      - db
+    - db
 
   db:
     image: postgres:13.8-bullseye
@@ -41,7 +41,7 @@ services:
       POSTGRES_USER: "content_discovery"
       POSTGRES_DB: "content_discovery"
     volumes:
-      - content_discovery-db-data:/var/lib/postgresql/data
+    - content_discovery-db-data:/var/lib/postgresql/data
     restart: always
     healthcheck:
       test: pg_isready -U content_discovery

@@ -29,12 +29,13 @@ async def like_snap(
 
     # Increase likes from snap
     await snap_dao.increase_likes(snap_id)
+    snap = await snap_dao.get_snap_from_id(snap_id)
 
     # send new like notification
     await Notifications().send_like_notification(
         from_id=user_id,
         to_id=user_id,
-        snap_id=snap_id,
+        snap_id=snap.user_id,
         snap_dao=snap_dao,
     )
 
