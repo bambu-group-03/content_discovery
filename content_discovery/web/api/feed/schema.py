@@ -22,6 +22,7 @@ class Snap(BaseModel):
     privacy: int
     has_shared: Optional[bool] = False
     has_liked: Optional[bool] = False
+    has_faved: Optional[bool] = False
     num_replies: Optional[int] = 0
     profile_photo_url: Optional[str] = None
     is_shared_by: List[str] = []

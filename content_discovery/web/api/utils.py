@@ -17,8 +17,8 @@ def get_user_info(user_id: str) -> tuple[str, str, str]:
 
         photo_url = author["profile_photo_id"]
         username = author["username"]
-        first_name = author["first_name"]
-        last_name = author["last_name"]
+        first_name = author["first_name"] or "Unknown"
+        last_name = author["last_name"] or "name"
 
         fullname = f"{first_name} {last_name}"
         return (username, fullname, photo_url)
@@ -118,9 +118,12 @@ async def complete_snap(
 
     has_shared = await snaps_dao.user_has_shared(user_id, snap.id)
     has_liked = await snaps_dao.user_has_liked(user_id, snap.id)
+    has_faved = await snaps_dao.user_has_faved(user_id, snap.id)
     num_replies = await snaps_dao.count_replies_by_snap(snap.id)
+
     can_see_likes = is_mutuals_or_equal(user_id, snap.user_id)
     likes = snap.likes if can_see_likes else None
+
     return Snap(
         id=snap.id,
         author=snap.user_id,
@@ -136,6 +139,7 @@ async def complete_snap(
         privacy=snap.privacy,
         num_replies=num_replies,
         has_shared=has_shared,
+        has_faved=has_faved,
         has_liked=has_liked,
         profile_photo_url=url,
     )
@@ -152,6 +156,7 @@ async def complete_snap_and_share(
     # TODO: repeated code
     has_shared = await snaps_dao.user_has_shared(user_id, snap["SnapsModel"].id)
     has_liked = await snaps_dao.user_has_liked(user_id, snap["SnapsModel"].id)
+    has_faved = await snaps_dao.user_has_faved(user_id, snap["SnapsModel"].id)
     num_replies = await snaps_dao.count_replies_by_snap(snap["SnapsModel"].id)
     can_see_likes = is_mutuals_or_equal(user_id, snap["SnapsModel"].user_id)
 
@@ -182,6 +187,7 @@ async def complete_snap_and_share(
         num_replies=num_replies,
         has_shared=has_shared,
         has_liked=has_liked,
+        has_faved=has_faved,
         profile_photo_url=url_author,
         is_shared_by=was_shared_by,
     )

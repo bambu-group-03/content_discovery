@@ -146,6 +146,17 @@ async def unfav_snap(
     await snap_dao.decrease_favs(snap_id)
 
 
+@router.get("/{user_id}/favs")
+async def get_favs(
+    user_id: str,
+    fav_dao: FavDAO = Depends(),
+    snap_dao: SnapDAO = Depends(),
+) -> FeedPack:
+    """Returns a list of snaps that the user has fav'd."""
+    snaps = await fav_dao.get_favs_by_user(user_id)
+    return await complete_snaps(snaps, user_id, snap_dao)
+
+
 @router.post("/{user_id}/set_public/{snap_id}")
 async def make_snap_public(
     user_id: str,

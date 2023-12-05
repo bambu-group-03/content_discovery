@@ -446,6 +446,17 @@ class SnapDAO:
 
         return bool(my_list)
 
+    async def user_has_faved(self, user_id: str, snap_id: uuid.UUID) -> bool:
+        """Boolean whether user has faved the snap"""
+        query = select(FavModel)
+        query = query.where(FavModel.snap_id == snap_id)
+        query = query.where(FavModel.user_id == user_id)
+
+        rows = await self.session.execute(query)
+        res = list(rows.scalars().fetchall())
+
+        return bool(res)
+
     # codigo repetido - uno filtra privacidad y otro no
 
     async def get_snap_replies(
