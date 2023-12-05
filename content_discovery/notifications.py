@@ -99,6 +99,7 @@ async def _format_snap(snap_id: Any, snap_dao: SnapDAO) -> Any:
         "num_replies": full_snap.num_replies,
         "has_shared": full_snap.has_shared,
         "has_liked": full_snap.has_liked,
+        "has_faved": full_snap.has_faved,
         "profile_photo_url": full_snap.profile_photo_url,
     }
 
