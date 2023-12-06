@@ -26,7 +26,7 @@ def get_user_info(user_id: str) -> tuple[str, str, str]:
         return ("Unknown", "Unknown", "Unknown")
 
 
-def followed_users(user_id: str) -> List[Dict[str, str]]:
+def followed_users(user_id: str) -> List[Dict[str, Any]]:
     """
     Returns a list of users that the user follows.
 

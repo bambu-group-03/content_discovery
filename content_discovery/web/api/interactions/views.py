@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, List
 
 import httpx
 from fastapi import APIRouter
@@ -9,10 +9,11 @@ from content_discovery.db.dao.like_dao import LikeDAO
 from content_discovery.db.dao.mention_dao import MentionDAO
 from content_discovery.db.dao.share_dao import ShareDAO
 from content_discovery.db.dao.snaps_dao import SnapDAO
+from content_discovery.db.dao.hashtag_dao import HashtagDAO
 from content_discovery.notifications import Notifications
 from content_discovery.web.api.feed.schema import FeedPack
 from content_discovery.web.api.utils import complete_snaps
-
+import datetime
 router = APIRouter()
 
 
@@ -186,3 +187,9 @@ async def get_mentioned_snap_by_id(
     """Returns a list of snaps where the user is mentioned."""
     snaps = await mention_dao.get_mentions(user_id)
     return await complete_snaps(snaps, user_id, snap_dao)
+
+# test
+@router.get("/hashtags/top")
+async def get_top_hashtags(hashtag_dao: HashtagDAO = Depends()) -> List[Any]:
+    list_of_rows = await hashtag_dao.get_top_hashtags(datetime.datetime(2000,1,1,1,1,1), 4)
+    return [str(elem) for elem in list_of_rows]

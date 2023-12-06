@@ -158,20 +158,20 @@ async def get_snaps_and_shares(
     """Returns a list of snaps and snapshares from user."""
     try:
         followed_by_user = followed_users(requester_id)
-        snaps = await snaps_dao.get_snaps_and_shares(
-            [{"id": user_id}],
-            followed_by_user,
-            limit,
-            offset,
-        )
+    except:
+        raise HTTPException(status_code=500, detail="Could not find requester")
+    snaps = await snaps_dao.get_snaps_and_shares(
+        [{"id": user_id}],
+        followed_by_user,
+        limit,
+        offset,
+    )
 
-        return await complete_snaps_and_shares(
-            snaps,
-            requester_id,
-            snaps_dao,
-        )
-    except Exception as e:
-        raise HTTPException(status_code=300, detail=str(e))
+    return await complete_snaps_and_shares(
+        snaps,
+        requester_id,
+        snaps_dao,
+    )
 
 
 @router.get("/{user_id}/shares")
