@@ -109,10 +109,10 @@ class SnapDAO:
 
             # Delete snap mentions
             await self.delete_snap_mentions(snap_id)
+            query = delete(SnapsModel).where(SnapsModel.id == snap_id)
+            await self.session.execute(query)
         except Exception as e:
             raise HTTPException(500, f"{e}\nfailed cleanup")
-        query = delete(SnapsModel).where(SnapsModel.id == snap_id)
-        await self.session.execute(query)
 
     async def delete_snap_likes(
         self,
