@@ -156,19 +156,22 @@ async def get_snaps_and_shares(
     snaps_dao: SnapDAO = Depends(),
 ) -> FeedPack:
     """Returns a list of snaps and snapshares from user."""
-    followed_by_user = followed_users(requester_id)
-    snaps = await snaps_dao.get_snaps_and_shares(
-        [{"id": user_id}],
-        followed_by_user,
-        limit,
-        offset,
-    )
+    try:
+        followed_by_user = followed_users(requester_id)
+        snaps = await snaps_dao.get_snaps_and_shares(
+            [{"id": user_id}],
+            followed_by_user,
+            limit,
+            offset,
+        )
 
-    return await complete_snaps_and_shares(
-        snaps,
-        requester_id,
-        snaps_dao,
-    )
+        return await complete_snaps_and_shares(
+            snaps,
+            requester_id,
+            snaps_dao,
+        )
+    except Exception as e:
+        raise HTTPException(status_code=300, detail=str(e))
 
 
 @router.get("/{user_id}/shares")
