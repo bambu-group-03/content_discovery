@@ -113,13 +113,14 @@ class SnapDAO:
             # set children to null.
             query = update(SnapsModel).where(SnapsModel.parent_id == snap_id)
             query = query.values(parent_id=None)
-            self.session.execute(query)
+            result = await self.session.execute(query)
+            count_null = result.rowcount
 
             # finally, delete the parent
             query = delete(SnapsModel).where(SnapsModel.id == snap_id)
             await self.session.execute(query)
         except Exception as e:
-            raise HTTPException(500, detail=f"{e}\nfailed cleanup")
+            raise HTTPException(500, detail=f"{e}\ndeleted_children:{count_null}")
 
     async def delete_snap_likes(
         self,
