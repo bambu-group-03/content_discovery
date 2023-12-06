@@ -63,7 +63,7 @@ async def post_snap(
             snap_dao=snaps_dao,
         )
     completed_snaps = await complete_snaps([snap], incoming_message.user_id, snaps_dao)
-    return completed_snaps[0]
+    return completed_snaps.snaps[0]
 
 
 @router.post("/reply", response_model=None)
