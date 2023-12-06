@@ -147,15 +147,16 @@ async def get_snaps(
     return FeedPack(snaps=[])
 
 
-@router.get("/{user_id}/snaps_and_shares")
+@router.get("/{user_id}/snaps_and_shares/requested_by/{requester_id}")
 async def get_snaps_and_shares(
     user_id: str,
+    requester_id: str,
     limit: int = 10,
     offset: int = 0,
     snaps_dao: SnapDAO = Depends(),
 ) -> FeedPack:
     """Returns a list of snaps and snapshares from user."""
-    followed_by_user = followed_users(user_id)
+    followed_by_user = followed_users(requester_id)
     snaps = await snaps_dao.get_snaps_and_shares(
         [{"id": user_id}],
         followed_by_user,
@@ -165,7 +166,7 @@ async def get_snaps_and_shares(
 
     return await complete_snaps_and_shares(
         snaps,
-        user_id,
+        requester_id,
         snaps_dao,
     )
 
