@@ -2,7 +2,7 @@ import datetime
 import uuid
 from typing import Any, Dict, List, Optional, Union
 
-from fastapi import Depends
+from fastapi import Depends, HTTPException
 from sqlalchemy import Select, delete, func, or_, outerjoin, select, update
 from sqlalchemy.engine.row import RowMapping
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -94,22 +94,23 @@ class SnapDAO:
         """
         if not is_valid_uuid(snap_id):
             return
+        try:
+            # Delete snap likes
+            await self.delete_snap_likes(snap_id=snap_id)
 
-        # Delete snap likes
-        await self.delete_snap_likes(snap_id=snap_id)
+            # Delete snap shares
+            await self.delete_snap_shares(snap_id)
 
-        # Delete snap shares
-        await self.delete_snap_shares(snap_id)
+            # Delete snap favs
+            await self.delete_snap_favs(snap_id)
 
-        # Delete snap favs
-        await self.delete_snap_favs(snap_id)
+            # Delete snap hashtags
+            await self.delete_snap_hashtags(snap_id)
 
-        # Delete snap hashtags
-        await self.delete_snap_hashtags(snap_id)
-
-        # Delete snap mentions
-        await self.delete_snap_mentions(snap_id)
-
+            # Delete snap mentions
+            await self.delete_snap_mentions(snap_id)
+        except Exception as e:
+            raise HTTPException(500, f"{e}\nfailed cleanup")
         query = delete(SnapsModel).where(SnapsModel.id == snap_id)
         await self.session.execute(query)
 
