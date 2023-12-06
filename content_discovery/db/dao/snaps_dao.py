@@ -595,7 +595,7 @@ def _query_privacy_filter_to_only_followers(
     )
 
 
-def _sort_snaps_with_children(snaps: List[Snap]) -> FeedPack:
+def sort_snaps_with_children(snaps: List[Snap]) -> FeedPack:
     """Sorts snaps so that each parent snap is followed by its children snaps."""
     snap_children: Dict[str, List[Snap]] = {}
 

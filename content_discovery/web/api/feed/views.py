@@ -7,7 +7,7 @@ from fastapi.param_functions import Depends
 from content_discovery.constants import Frequency, Privacy
 from content_discovery.db.dao.hashtag_dao import HashtagDAO
 from content_discovery.db.dao.mention_dao import MentionDAO
-from content_discovery.db.dao.snaps_dao import SnapDAO, _sort_snaps_with_children
+from content_discovery.db.dao.snaps_dao import SnapDAO, sort_snaps_with_children
 from content_discovery.db.models.snaps_model import SnapsModel
 from content_discovery.notifications import Notifications
 from content_discovery.web.api.feed.schema import (
@@ -139,9 +139,8 @@ async def get_snaps(
     completed_snaps = await complete_snaps_and_shares(snaps, user_id, snaps_dao)
 
     if completed_snaps.snaps is not None:
-        return _sort_snaps_with_children(completed_snaps.snaps)
-    else:
-        return FeedPack(snaps=[])
+        return sort_snaps_with_children(completed_snaps.snaps)
+    return FeedPack(snaps=[])
 
 
 @router.get("/{user_id}/snaps_and_shares")
