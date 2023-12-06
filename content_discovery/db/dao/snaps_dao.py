@@ -17,6 +17,7 @@ from content_discovery.db.models.mention_model import MentionModel
 from content_discovery.db.models.share_model import ShareModel
 from content_discovery.db.models.snaps_model import SnapsModel
 from content_discovery.db.utils import is_valid_uuid
+from content_discovery.web.api.feed.schema import FeedPack, Snap
 
 
 class SnapDAO:
@@ -592,3 +593,29 @@ def _query_privacy_filter_to_only_followers(
             SnapsModel.user_id.in_(followed_by_user_list),
         ),
     )
+
+
+def _sort_snaps_with_children(snaps: List[Snap]) -> FeedPack:
+    """Sorts snaps so that each parent snap is followed by its children snaps."""
+    snap_children: Dict[str, List[Snap]] = {}
+
+    # Initialize the dictionary
+    for snap in snaps:
+        if snap.parent_id:
+            # Convert UUID to string
+            parent_id_str = str(snap.parent_id)
+            snap_children.setdefault(parent_id_str, []).append(snap)
+
+    # Create the sorted data array
+    sorted_snaps: List[Snap] = []
+
+    for snap in snaps:
+        if not snap.parent_id:
+            # Add snaps without parents directly
+            sorted_snaps.append(snap)
+            # Convert UUID to string
+            snap_id_str = str(snap.id)
+            # Add their children
+            sorted_snaps.extend(snap_children.get(snap_id_str, []))
+
+    return FeedPack(snaps=sorted_snaps)
