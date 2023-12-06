@@ -34,6 +34,24 @@ OK = 200
 DAYS_MONTH = 30
 
 
+async def create_tweet(snap, user_id, hashtag_dao, mention_dao, snaps_dao):
+    # Create hashtags and mentions
+    await hashtag_dao.create_hashtags(snap.id, snap.content)
+    await mention_dao.create_mentions(snap.id, snap.content)
+    mentions = await mention_dao.get_mentioned_users_in_snap(snap.id)
+    mentions_ids = [mention.mentioned_id for mention in mentions]
+    unique = list(dict.fromkeys(mentions_ids))
+    for mention_id in unique:
+        await Notifications().send_mention_notification(
+            from_id=user_id,
+            to_id=mention_id,
+            snap_id=snap.id,
+            snap_dao=snaps_dao,
+        )
+    completed_snaps = await complete_snaps([snap], user_id, snaps_dao)
+    return completed_snaps.snaps[0]
+
+
 @router.post("/post", response_model=None)
 async def post_snap(
     incoming_message: PostSnap,
@@ -49,21 +67,10 @@ async def post_snap(
         content=incoming_message.content,
         privacy=incoming_message.privacy,
     )
-    # Create hashtags and mentions
-    await hashtag_dao.create_hashtags(snap.id, snap.content)
-    await mention_dao.create_mentions(snap.id, snap.content)
-    mentions = await mention_dao.get_mentioned_users_in_snap(snap.id)
-    mentions_ids = [mention.mentioned_id for mention in mentions]
-    unique = list(dict.fromkeys(mentions_ids))
-    for mention_id in unique:
-        await Notifications().send_mention_notification(
-            from_id=incoming_message.user_id,
-            to_id=mention_id,
-            snap_id=snap.id,
-            snap_dao=snaps_dao,
-        )
-    completed_snaps = await complete_snaps([snap], incoming_message.user_id, snaps_dao)
-    return completed_snaps.snaps[0]
+    return await create_tweet(
+        snap,
+        incoming_message.user_id,
+        hashtag_dao, mention_dao, snaps_dao)
 
 
 @router.post("/reply", response_model=None)
@@ -75,7 +82,7 @@ async def reply_snap(
 ) -> Optional[SnapsModel]:
     """Create a reply snap with the received content."""
     if not incoming_message.parent_id:
-        return None
+        raise HTTPException(400, detail="Must specify parent tweet")
 
     snap = await snaps_dao.create_reply_snap(
         user_id=incoming_message.user_id,
@@ -84,25 +91,10 @@ async def reply_snap(
         privacy=incoming_message.privacy,
     )
 
-    if not snap:
-        return None
-
-    # Create hashtags and mentions
-    await hashtag_dao.create_hashtags(snap.id, snap.content)
-    await mention_dao.create_mentions(snap.id, snap.content)
-    mentions = await mention_dao.get_mentioned_users_in_snap(snap.id)
-    mentions_ids = [mention.mentioned_id for mention in mentions]
-    unique = list(dict.fromkeys(mentions_ids))
-    for mention_id in unique:
-        await Notifications().send_mention_notification(
-            from_id=incoming_message.user_id,
-            to_id=mention_id,
-            snap_id=snap.id,
-            snap_dao=snaps_dao,
-        )
-
-    completed_snaps = await complete_snaps([snap], incoming_message.user_id, snaps_dao)
-    return completed_snaps.snaps[0]
+    return await create_tweet(
+        snap,
+        incoming_message.user_id,
+        hashtag_dao, mention_dao, snaps_dao)
 
 
 @router.put("/update_snap")
