@@ -109,6 +109,13 @@ class SnapDAO:
 
             # Delete snap mentions
             await self.delete_snap_mentions(snap_id)
+
+            # set children to null.
+            query = update(SnapsModel).where(SnapsModel.parent_id == snap_id)
+            query = query.values(parent_id=None)
+            self.session.execute(query)
+
+            # finally, delete the parent
             query = delete(SnapsModel).where(SnapsModel.id == snap_id)
             await self.session.execute(query)
         except Exception as e:
