@@ -77,21 +77,32 @@ async def reply_snap(
     if not incoming_message.parent_id:
         return None
 
-    reply = await snaps_dao.create_reply_snap(
+    snap = await snaps_dao.create_reply_snap(
         user_id=incoming_message.user_id,
         content=incoming_message.content,
         parent_id=incoming_message.parent_id,
         privacy=incoming_message.privacy,
     )
 
-    if not reply:
+    if not snap:
         return None
 
     # Create hashtags and mentions
-    await hashtag_dao.create_hashtags(reply.id, reply.content)
-    await mention_dao.create_mentions(reply.id, reply.content)
+    await hashtag_dao.create_hashtags(snap.id, snap.content)
+    await mention_dao.create_mentions(snap.id, snap.content)
+    mentions = await mention_dao.get_mentioned_users_in_snap(snap.id)
+    mentions_ids = [mention.mentioned_id for mention in mentions]
+    unique = list(dict.fromkeys(mentions_ids))
+    for mention_id in unique:
+        await Notifications().send_mention_notification(
+            from_id=incoming_message.user_id,
+            to_id=mention_id,
+            snap_id=snap.id,
+            snap_dao=snaps_dao,
+        )
 
-    return reply
+    completed_snaps = await complete_snaps([snap], incoming_message.user_id, snaps_dao)
+    return completed_snaps.snaps[0]
 
 
 @router.put("/update_snap")
