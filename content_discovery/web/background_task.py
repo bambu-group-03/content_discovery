@@ -40,7 +40,13 @@ class BackgroundTask:
                 new_tags = await self._store(tags, trend_dao)
                 # send notif
                 if new_tags:
-                    await self._send_notification(new_tags)
+                    try:
+                        await self._send_notification(new_tags)
+                    except:
+                        await trend_dao.create_topic_model(name="sending notif failed DEBUG error")
+                else:
+                    await trend_dao.create_topic_model(name="sending notif failed DEBUG no tags")
+
             await asyncio.sleep(self.PERIOD_SECONDS)
 
         print("return from task")

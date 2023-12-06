@@ -65,14 +65,11 @@ class Notifications:
 
         timeout = httpx.Timeout(5.0, read=5.0)
 
-        try:
-            httpx.post(
-                _url_post_trending_notification(),
-                json=json_params,
-                timeout=timeout,
-            )
-        except Exception as exc:
-            print(str(exc))
+        httpx.post(
+            _url_post_trending_notification(),
+            json=json_params,
+            timeout=timeout,
+        )
 
 
 async def _format_snap(snap_id: Any, snap_dao: SnapDAO) -> Any:
