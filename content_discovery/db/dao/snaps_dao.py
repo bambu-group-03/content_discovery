@@ -95,32 +95,17 @@ class SnapDAO:
         if not is_valid_uuid(snap_id):
             return
         try:
-            # Delete snap likes
-            await self.delete_snap_likes(snap_id=snap_id)
-
-            # Delete snap shares
-            await self.delete_snap_shares(snap_id)
-
-            # Delete snap favs
-            await self.delete_snap_favs(snap_id)
-
-            # Delete snap hashtags
-            await self.delete_snap_hashtags(snap_id)
-
-            # Delete snap mentions
-            await self.delete_snap_mentions(snap_id)
-
-            # set children to null.
-            query = update(SnapsModel).where(SnapsModel.parent_id == snap_id)
-            query = query.values(parent_id=None)
-            result = await self.session.execute(query)
-            count_null = result.rowcount
-
-            # finally, delete the parent
+            await self._delete_tables_related_to(snap_id)
+            count_orphaned_children = await self._delete_references_in_children_of(
+                snap_id,
+            )
             query = delete(SnapsModel).where(SnapsModel.id == snap_id)
             await self.session.execute(query)
-        except Exception as e:
-            raise HTTPException(500, detail=f"{e}\ndeleted_children:{count_null}")
+        except Exception as exc:
+            raise HTTPException(
+                500,
+                detail=f"{exc}\ndeleted_children:{count_orphaned_children}",
+            )
 
     async def delete_snap_likes(
         self,
@@ -566,6 +551,28 @@ class SnapDAO:
                 "period_shares": period_share,
             },
         ]
+
+    async def _delete_tables_related_to(self, snap_id: str) -> None:
+        # Delete snap likes
+        await self.delete_snap_likes(snap_id=snap_id)
+
+        # Delete snap shares
+        await self.delete_snap_shares(snap_id)
+
+        # Delete snap favs
+        await self.delete_snap_favs(snap_id)
+
+        # Delete snap hashtags
+        await self.delete_snap_hashtags(snap_id)
+
+        # Delete snap mentions
+        await self.delete_snap_mentions(snap_id)
+
+    async def _delete_references_in_children_of(self, snap_id: str) -> int:
+        query = update(SnapsModel).where(SnapsModel.parent_id == snap_id)
+        query = query.values(parent_id=None)
+        result = await self.session.execute(query)
+        return result.rowcount
 
 
 def _query_visibility_is_public(query: Any) -> Any:

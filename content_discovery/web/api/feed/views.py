@@ -35,8 +35,14 @@ OK = 200
 DAYS_MONTH = 30
 
 
-async def create_snap(snap, user_id, hashtag_dao, mention_dao, snaps_dao, trend_dao):
-    # Create hashtags and mentions
+async def _create_snap(
+    snap: SnapsModel,
+    user_id: str,
+    hashtag_dao: HashtagDAO,
+    mention_dao: MentionDAO,
+    snaps_dao: SnapDAO,
+    trend_dao: TrendingTopicDAO,
+) -> Snap:
     hashtags = await hashtag_dao.create_hashtags(snap.id, snap.content)
     await mention_dao.create_mentions(snap.id, snap.content)
     mentions = await mention_dao.get_mentioned_users_in_snap(snap.id)
@@ -59,8 +65,8 @@ async def create_snap(snap, user_id, hashtag_dao, mention_dao, snaps_dao, trend_
     )
 
     # return info
-    completed_snaps = await complete_snaps([snap], user_id, snaps_dao)
-    return completed_snaps.snaps[0]
+    completed_snap = await complete_snap(snap, user_id, snaps_dao)
+    return completed_snap
 
 
 @router.post("/post", response_model=None)
@@ -70,7 +76,7 @@ async def post_snap(
     hashtag_dao: HashtagDAO = Depends(),
     mention_dao: MentionDAO = Depends(),
     trend_dao: TrendingTopicDAO = Depends(),
-) -> Optional[SnapsModel]:
+) -> Optional[Snap]:
     """Create a snap with the received content."""
     Privacy.validate(incoming_message.privacy)
     # create snap
@@ -79,7 +85,7 @@ async def post_snap(
         content=incoming_message.content,
         privacy=incoming_message.privacy,
     )
-    return await create_snap(
+    return await _create_snap(
         snap,
         incoming_message.user_id,
         hashtag_dao,
@@ -96,7 +102,7 @@ async def reply_snap(
     hashtag_dao: HashtagDAO = Depends(),
     mention_dao: MentionDAO = Depends(),
     trend_dao: TrendingTopicDAO = Depends(),
-) -> Optional[SnapsModel]:
+) -> Optional[Snap]:
     """Create a reply snap with the received content."""
     if not incoming_message.parent_id:
         raise HTTPException(400, detail="Must specify parent tweet")
@@ -107,15 +113,16 @@ async def reply_snap(
         parent_id=incoming_message.parent_id,
         privacy=incoming_message.privacy,
     )
-
-    return await create_snap(
-        snap,
-        incoming_message.user_id,
-        hashtag_dao,
-        mention_dao,
-        snaps_dao,
-        trend_dao,
-    )
+    if snap:
+        return await _create_snap(
+            snap,
+            incoming_message.user_id,
+            hashtag_dao,
+            mention_dao,
+            snaps_dao,
+            trend_dao,
+        )
+    return None
 
 
 @router.put("/update_snap")
@@ -179,8 +186,8 @@ async def get_snaps_and_shares(
     """Returns a list of snaps and snapshares from user."""
     try:
         followed_by_user = followed_users(requester_id)
-    except:
-        raise HTTPException(status_code=500, detail="Could not find requester")
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Could not find requester: {exc}")
     snaps = await snaps_dao.get_snaps_and_shares(
         [{"id": user_id}],
         followed_by_user,

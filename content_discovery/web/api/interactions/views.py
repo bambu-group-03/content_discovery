@@ -193,7 +193,9 @@ async def get_mentioned_snap_by_id(
 # test
 @router.get("/hashtags/top")
 async def get_top_hashtags(hashtag_dao: HashtagDAO = Depends()) -> List[Any]:
+    """Get hashtags with more than 4 appearances in the hashtag table."""
     list_of_rows = await hashtag_dao.get_top_hashtags(
-        datetime.datetime(2000, 1, 1, 1, 1, 1), 4
+        datetime.datetime(2000, 1, 1, 1, 1, 1),
+        4,
     )
     return [str(elem) for elem in list_of_rows]

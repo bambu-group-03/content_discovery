@@ -8,6 +8,8 @@ from content_discovery.db.dao.hashtag_dao import HashtagDAO
 from content_discovery.db.dao.trending_topic_dao import TrendingTopicDAO
 from content_discovery.notifications import Notifications
 
+PERIOD_SECONDS = 5
+
 
 class BackgroundTask:
     """Background process that continuously pings and handles trending topics"""
@@ -16,8 +18,6 @@ class BackgroundTask:
         self.app = None
         self.session: AsyncSession
         self.running = True
-        self.MAX_SNAPS = 10000
-        self.PERIOD_SECONDS = 5
         self.cutoff = datetime.timedelta(weeks=1)
         self.deleting_delta = datetime.timedelta(hours=3)
         self.period_deleting_minutes = 5
@@ -37,14 +37,14 @@ class BackgroundTask:
                 cutoff_date=date,
                 minimum_hashtag_count=4,
             )
-            if len(tags):
+            if tags:
                 # store all tags in trend database
                 new_tags = await self._store(tags, trend_dao)
                 # send notif
                 if new_tags:
                     await self._send_notification(new_tags)
 
-            await asyncio.sleep(self.PERIOD_SECONDS)
+            await asyncio.sleep(PERIOD_SECONDS)
 
         print("return from task")
 
@@ -60,12 +60,8 @@ class BackgroundTask:
             await asyncio.sleep(60 * self.period_deleting_minutes)
 
     async def _send_notification(self, new_tags: List[Any]) -> None:
-        try:
-            first_tag = max(new_tags, key=lambda tag: tag["count"])
-            print("sending trending notif")
-            await Notifications().send_trending_notification(first_tag["name"])
-        except Exception as e:
-            print(f"Failed sent notification {str(e)}")
+        first_tag = max(new_tags, key=lambda tag: tag["count"])
+        await Notifications().send_trending_notification(first_tag["name"])
 
     async def _store(self, tags: List[Any], trend_dao: TrendingTopicDAO) -> List[Any]:
         new_tags = []

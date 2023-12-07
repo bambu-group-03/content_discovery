@@ -19,7 +19,8 @@ class Notifications:
         hashtags: List[str],
         snap_dao: SnapDAO,
         topic_dao: TrendingTopicDAO,
-    ):
+    ) -> None:
+        """Notify snap is about trending topic."""
         topics = await topic_dao.get_all_topics()
         topic_names = [topic.name for topic in topics]
         print(topic_names)
