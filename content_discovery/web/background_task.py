@@ -40,21 +40,19 @@ class BackgroundTask:
                 new_tags = await self._store(tags, trend_dao)
                 # send notif
                 if new_tags:
-                    try:
-                        await self._send_notification(new_tags)
-                    except Exception as e:
-                        await trend_dao.create_topic_model(name=f"sending notif failed DEBUG error {str(e)}")
-                else:
-                    await trend_dao.create_topic_model(name="notif failed DEBUG empty tglist")
+                    await self._send_notification(new_tags)
 
             await asyncio.sleep(self.PERIOD_SECONDS)
 
         print("return from task")
 
     async def _send_notification(self, new_tags: List[Any]) -> None:
-        first_tag = max(new_tags, key=lambda tag: tag["count"])
-        print("sending trending notif")
-        await Notifications().send_trending_notification(first_tag["name"])
+        try:
+            first_tag = max(new_tags, key=lambda tag: tag["count"])
+            print("sending trending notif")
+            await Notifications().send_trending_notification(first_tag["name"])
+        except Exception as e:
+            print(f"Failed sent notification {str(e)}")
 
     async def _store(self, tags: List[Any], trend_dao: TrendingTopicDAO) -> List[Any]:
         new_tags = []
