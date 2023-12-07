@@ -45,7 +45,7 @@ class BackgroundTask:
                     except Exception as e:
                         await trend_dao.create_topic_model(name=f"sending notif failed DEBUG error {str(e)}")
                 else:
-                    await trend_dao.create_topic_model(name="notif failed DEBUG no tags")
+                    await trend_dao.create_topic_model(name="notif failed DEBUG empty tglist")
 
             await asyncio.sleep(self.PERIOD_SECONDS)
 

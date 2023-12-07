@@ -58,16 +58,16 @@ class Notifications:
         topic: str,
     ) -> None:
         """Send trending notification."""
-        json_params = {
+        params = {
             "topic": topic,
         }
-        print(f"params trending: {json_params}")
+        print(f"params trending: {params}")
 
         timeout = httpx.Timeout(5.0, read=5.0)
 
         httpx.post(
             _url_post_trending_notification(),
-            json=json_params,
+            params=params,
             timeout=timeout,
         )
 
