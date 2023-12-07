@@ -8,13 +8,6 @@ from content_discovery.db.models.trending_model import TrendingTopicModel
 router = APIRouter()
 
 
-@router.get("/trending")
-async def get_trending(
-    topic_dao: TrendingTopicDAO = Depends(),
-) -> None:
-    """Updates a snap."""
-
-
 @router.get("/get_all", response_model=None)
 async def get_all(
     topic_dao: TrendingTopicDAO = Depends(),
