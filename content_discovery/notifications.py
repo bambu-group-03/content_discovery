@@ -1,15 +1,24 @@
 import uuid
-from typing import Any
+from typing import Any, List
 
 import httpx
 
 from content_discovery.db.dao.snaps_dao import SnapDAO
 from content_discovery.settings import settings
 from content_discovery.web.api.utils import complete_snap
-
+from content_discovery.db.dao.trending_topic_dao import TrendingTopicDAO
+from content_discovery.db.models.snaps_model import SnapsModel
 
 class Notifications:
     """Send notifications."""
+
+    async def notify_if_snap_is_about_trending_topic(
+        self, snap : SnapsModel, hashtags: List[str], topic_dao: TrendingTopicDAO):
+        topics = await topic_dao.get_all_topics()
+        topic_names = [topic.name for topic in topics]
+        for tag in hashtags:
+            if tag in topic_names:
+                await self.send_notification_of_snap_in_trending(snap)
 
     async def send_mention_notification(
         self,
@@ -71,6 +80,24 @@ class Notifications:
             timeout=timeout,
         )
 
+    async def send_notification_of_snap_in_trending(
+        self,
+        snap: SnapsModel,
+        topic: str,
+    ) -> None:
+        """Send trending snap notification."""
+        params = {
+            "snap": snap.id,
+            "topic": topic,
+        }
+        timeout = httpx.Timeout(5.0, read=5.0)
+
+        httpx.post(
+            _url_post_trending_snap_notification(),
+            params=params,
+            timeout=timeout,
+        )
+
 
 async def _format_snap(snap_id: Any, snap_dao: SnapDAO) -> Any:
     snap = await snap_dao.get_snap_from_id(snap_id)
@@ -114,3 +141,8 @@ def _url_post_like_notification() -> str:
 def _url_post_trending_notification() -> str:
     print(f"{settings.identity_socializer_url}/api/notification/new_trending")
     return f"{settings.identity_socializer_url}/api/notification/new_trending"
+
+
+def _url_post_trending_snap_notification() -> str:
+    print(f"{settings.identity_socializer_url}/api/notification/new_trending_snap")
+    return f"{settings.identity_socializer_url}/api/notification/new_trending_snap"

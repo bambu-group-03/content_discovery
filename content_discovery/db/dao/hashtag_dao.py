@@ -38,13 +38,15 @@ class HashtagDAO:
         self,
         snap_id: uuid.UUID,
         content: str,
-    ) -> None:
+    ) -> List[str]:
         """Create hashtags from snap content."""
         if "#" in content:
             hashtags = re.findall(r"(?:^|\s)(#\w+)", content)
 
             for hashtag in hashtags:
                 await self.create_hashtag_model(snap_id, hashtag)
+
+            return hashtags
 
     async def filter_hashtags(
         self,
