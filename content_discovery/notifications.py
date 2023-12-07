@@ -98,11 +98,12 @@ class Notifications:
             "topic": topic,
             "snap": await _format_snap(snap.id, snap_dao),
         }
+        print(params)
         timeout = httpx.Timeout(10.0, read=10.0)
 
         httpx.post(
             _url_post_trending_snap_notification(),
-            params=params,
+            json=params,
             timeout=timeout,
         )
 
