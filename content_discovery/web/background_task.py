@@ -35,7 +35,7 @@ class BackgroundTask:
                 cutoff_date=date,
                 minimum_hashtag_count=4,
             )
-            if tags:
+            if len(tags):
                 # store all tags in trend database
                 new_tags = await self._store(tags, trend_dao)
                 # send notif
@@ -45,7 +45,7 @@ class BackgroundTask:
                     except:
                         await trend_dao.create_topic_model(name="sending notif failed DEBUG error")
                 else:
-                    await trend_dao.create_topic_model(name="sending notif failed DEBUG no tags")
+                    await trend_dao.create_topic_model(name="notif failed DEBUG no tags")
 
             await asyncio.sleep(self.PERIOD_SECONDS)
 
