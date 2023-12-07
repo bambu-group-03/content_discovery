@@ -4,20 +4,22 @@ from typing import Any, List
 import httpx
 
 from content_discovery.db.dao.snaps_dao import SnapDAO
-from content_discovery.settings import settings
-from content_discovery.web.api.utils import complete_snap
 from content_discovery.db.dao.trending_topic_dao import TrendingTopicDAO
 from content_discovery.db.models.snaps_model import SnapsModel
+from content_discovery.settings import settings
+from content_discovery.web.api.utils import complete_snap
+
 
 class Notifications:
     """Send notifications."""
 
     async def notify_if_snap_is_about_trending_topic(
         self,
-        snap : SnapsModel,
+        snap: SnapsModel,
         hashtags: List[str],
         snap_dao: SnapDAO,
-        topic_dao: TrendingTopicDAO):
+        topic_dao: TrendingTopicDAO,
+    ):
         topics = await topic_dao.get_all_topics()
         topic_names = [topic.name for topic in topics]
         print(topic_names)

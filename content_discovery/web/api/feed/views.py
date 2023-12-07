@@ -7,8 +7,8 @@ from fastapi.param_functions import Depends
 from content_discovery.constants import Frequency, Privacy
 from content_discovery.db.dao.hashtag_dao import HashtagDAO
 from content_discovery.db.dao.mention_dao import MentionDAO
-from content_discovery.db.dao.trending_topic_dao import TrendingTopicDAO
 from content_discovery.db.dao.snaps_dao import SnapDAO, sort_snaps_with_children
+from content_discovery.db.dao.trending_topic_dao import TrendingTopicDAO
 from content_discovery.db.models.snaps_model import SnapsModel
 from content_discovery.notifications import Notifications
 from content_discovery.web.api.feed.schema import (
@@ -52,7 +52,11 @@ async def create_snap(snap, user_id, hashtag_dao, mention_dao, snaps_dao, trend_
 
     # trigger notification
     await Notifications().notify_if_snap_is_about_trending_topic(
-        snap, hashtags, snaps_dao, trend_dao)
+        snap,
+        hashtags,
+        snaps_dao,
+        trend_dao,
+    )
 
     # return info
     completed_snaps = await complete_snaps([snap], user_id, snaps_dao)
@@ -78,7 +82,11 @@ async def post_snap(
     return await create_snap(
         snap,
         incoming_message.user_id,
-        hashtag_dao, mention_dao, snaps_dao, trend_dao)
+        hashtag_dao,
+        mention_dao,
+        snaps_dao,
+        trend_dao,
+    )
 
 
 @router.post("/reply", response_model=None)
@@ -103,7 +111,11 @@ async def reply_snap(
     return await create_snap(
         snap,
         incoming_message.user_id,
-        hashtag_dao, mention_dao, snaps_dao, trend_dao)
+        hashtag_dao,
+        mention_dao,
+        snaps_dao,
+        trend_dao,
+    )
 
 
 @router.put("/update_snap")

@@ -17,7 +17,7 @@ depends_on = None
 
 def upgrade() -> None:
     op.add_column("topics", sa.Column("created_at", sa.DateTime(), nullable=True))
-   
+
+
 def downgrade() -> None:
     op.drop_column("topics", "created_at")
-    
