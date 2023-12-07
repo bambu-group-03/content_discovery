@@ -1,7 +1,8 @@
+import datetime
 from typing import List, Optional
 
 from fastapi import Depends
-from sqlalchemy import select
+from sqlalchemy import delete, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from content_discovery.db.dependencies import get_db_session
@@ -50,3 +51,13 @@ class TrendingTopicDAO:
         query = select(TrendingTopicModel)
         rows = await self.session.execute(query)
         return list(rows.scalars().all())
+
+    async def delete_old_trending_topics(self, cutoff: datetime.timedelta) -> None:
+        """Delete old trending topics."""
+        query = delete(TrendingTopicModel)
+        query = query.where(
+            TrendingTopicModel.created_at < datetime.datetime.now() - cutoff,
+        )
+
+        await self.session.execute(query)
+        await self.session.commit()

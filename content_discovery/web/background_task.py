@@ -19,6 +19,8 @@ class BackgroundTask:
         self.MAX_SNAPS = 10000
         self.PERIOD_SECONDS = 5
         self.cutoff = datetime.timedelta(weeks=1)
+        self.deleting_delta = datetime.timedelta(hours=3)
+        self.period_deleting_minutes = 5
 
     async def my_task(self, an_app: Any) -> None:
         """Handle trending topics background process"""
@@ -46,6 +48,17 @@ class BackgroundTask:
 
         print("return from task")
 
+    async def delete_old_trending_topic(self, an_app: Any) -> None:
+        """Handle trending topics background process"""
+        self.app = an_app
+        self.session = an_app.state.db_session_factory()
+
+        trend_dao = TrendingTopicDAO(self.session)
+
+        while self.running:
+            await trend_dao.delete_old_trending_topics(self.deleting_delta)
+            await asyncio.sleep(60 * self.period_deleting_minutes)
+
     async def _send_notification(self, new_tags: List[Any]) -> None:
         try:
             first_tag = max(new_tags, key=lambda tag: tag["count"])
@@ -68,6 +81,7 @@ bgtask = BackgroundTask()
 
 def do_startup(an_app: Any) -> None:
     """Kick off background task (should be instance method)"""
-    print("Task Started")
+    print("Tasks Started")
     asyncio.create_task(bgtask.my_task(an_app))
-    print("Task Created")
+    asyncio.create_task(bgtask.delete_old_trending_topic(an_app))
+    print("Tasks Created")

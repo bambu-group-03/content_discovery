@@ -1,6 +1,7 @@
+import datetime
 import uuid
 
-from sqlalchemy import ForeignKey
+from sqlalchemy import DateTime, ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.sql.sqltypes import String, Uuid
 
@@ -20,6 +21,10 @@ class TrendingTopicModel(Base):
         primary_key=True,
     )
     name: Mapped[str] = mapped_column(String(length))
+    created_at: Mapped[datetime.datetime] = mapped_column(
+        DateTime,
+        default=datetime.datetime.utcnow,
+    )
 
 
 # probablemente no se use esto
