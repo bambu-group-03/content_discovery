@@ -114,6 +114,14 @@ async def reply_snap(
         privacy=incoming_message.privacy,
     )
     if snap:
+        # Send notification for new reply
+        await Notifications().send_reply_notification(
+            from_id=incoming_message.user_id,
+            to_id=snap.user_id,
+            snap_id=str(snap.id),
+            snap_dao=snaps_dao,
+        )
+
         return await _create_snap(
             snap,
             incoming_message.user_id,
