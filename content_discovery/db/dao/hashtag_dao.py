@@ -47,6 +47,8 @@ class HashtagDAO:
                 await self.create_hashtag_model(snap_id, hashtag)
 
             return hashtags
+        else:
+            return []
 
     async def filter_hashtags(
         self,
