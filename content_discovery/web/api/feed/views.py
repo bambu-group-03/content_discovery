@@ -7,6 +7,7 @@ from fastapi.param_functions import Depends
 from content_discovery.constants import Frequency, Privacy
 from content_discovery.db.dao.hashtag_dao import HashtagDAO
 from content_discovery.db.dao.mention_dao import MentionDAO
+from content_discovery.db.dao.trending_topic_dao import TrendingTopicDAO
 from content_discovery.db.dao.snaps_dao import SnapDAO, sort_snaps_with_children
 from content_discovery.db.models.snaps_model import SnapsModel
 from content_discovery.notifications import Notifications
@@ -34,9 +35,9 @@ OK = 200
 DAYS_MONTH = 30
 
 
-async def create_snap(snap, user_id, hashtag_dao, mention_dao, snaps_dao):
+async def create_snap(snap, user_id, hashtag_dao, mention_dao, snaps_dao, trend_dao):
     # Create hashtags and mentions
-    await hashtag_dao.create_hashtags(snap.id, snap.content)
+    hashtags = await hashtag_dao.create_hashtags(snap.id, snap.content)
     await mention_dao.create_mentions(snap.id, snap.content)
     mentions = await mention_dao.get_mentioned_users_in_snap(snap.id)
     mentions_ids = [mention.mentioned_id for mention in mentions]
@@ -48,6 +49,11 @@ async def create_snap(snap, user_id, hashtag_dao, mention_dao, snaps_dao):
             snap_id=snap.id,
             snap_dao=snaps_dao,
         )
+
+    # trigger notification
+    await Notifications().notify_if_snap_is_about_trending_topic(snap, hashtags, trend_dao)
+
+    # return info
     completed_snaps = await complete_snaps([snap], user_id, snaps_dao)
     return completed_snaps.snaps[0]
 
@@ -58,6 +64,7 @@ async def post_snap(
     snaps_dao: SnapDAO = Depends(),
     hashtag_dao: HashtagDAO = Depends(),
     mention_dao: MentionDAO = Depends(),
+    trend_dao: TrendingTopicDAO = Depends(),
 ) -> Optional[SnapsModel]:
     """Create a snap with the received content."""
     Privacy.validate(incoming_message.privacy)
@@ -70,7 +77,7 @@ async def post_snap(
     return await create_snap(
         snap,
         incoming_message.user_id,
-        hashtag_dao, mention_dao, snaps_dao)
+        hashtag_dao, mention_dao, snaps_dao, trend_dao)
 
 
 @router.post("/reply", response_model=None)
@@ -79,6 +86,7 @@ async def reply_snap(
     snaps_dao: SnapDAO = Depends(),
     hashtag_dao: HashtagDAO = Depends(),
     mention_dao: MentionDAO = Depends(),
+    trend_dao: TrendingTopicDAO = Depends(),
 ) -> Optional[SnapsModel]:
     """Create a reply snap with the received content."""
     if not incoming_message.parent_id:
@@ -94,7 +102,7 @@ async def reply_snap(
     return await create_snap(
         snap,
         incoming_message.user_id,
-        hashtag_dao, mention_dao, snaps_dao)
+        hashtag_dao, mention_dao, snaps_dao, trend_dao)
 
 
 @router.put("/update_snap")
