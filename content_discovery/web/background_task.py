@@ -42,8 +42,8 @@ class BackgroundTask:
                 if new_tags:
                     try:
                         await self._send_notification(new_tags)
-                    except:
-                        await trend_dao.create_topic_model(name="sending notif failed DEBUG error")
+                    except Exception as e:
+                        await trend_dao.create_topic_model(name=f"sending notif failed DEBUG error {str(e)}")
                 else:
                     await trend_dao.create_topic_model(name="notif failed DEBUG no tags")
 
