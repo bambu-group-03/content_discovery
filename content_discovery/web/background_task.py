@@ -54,7 +54,7 @@ class BackgroundTask:
     async def _send_notification(self, new_tags: List[Any]) -> None:
         first_tag = max(new_tags, key=lambda tag: tag["count"])
         print("sending trending notif")
-        await Notifications().send_trending_notification(first_tag)
+        await Notifications().send_trending_notification(first_tag["name"])
 
     async def _store(self, tags: List[Any], trend_dao: TrendingTopicDAO) -> List[Any]:
         new_tags = []
