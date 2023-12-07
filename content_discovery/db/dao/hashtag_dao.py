@@ -77,3 +77,15 @@ class HashtagDAO:
         )
         rows = await self.session.execute(query)
         return list(rows.mappings().fetchall())
+
+    async def get_times_used_by_hashtag(
+        self,
+        name: str,
+    ) -> int:
+        """Get usage of hashtag."""
+        query = select(HashtagModel.snap_id).distinct()
+        query = query.where(HashtagModel.name == name)
+
+        rows = await self.session.execute(query)
+
+        return len(rows.scalars().fetchall())
