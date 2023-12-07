@@ -34,7 +34,7 @@ OK = 200
 DAYS_MONTH = 30
 
 
-async def create_tweet(snap, user_id, hashtag_dao, mention_dao, snaps_dao):
+async def create_snap(snap, user_id, hashtag_dao, mention_dao, snaps_dao):
     # Create hashtags and mentions
     await hashtag_dao.create_hashtags(snap.id, snap.content)
     await mention_dao.create_mentions(snap.id, snap.content)
@@ -67,7 +67,7 @@ async def post_snap(
         content=incoming_message.content,
         privacy=incoming_message.privacy,
     )
-    return await create_tweet(
+    return await create_snap(
         snap,
         incoming_message.user_id,
         hashtag_dao, mention_dao, snaps_dao)
@@ -91,7 +91,7 @@ async def reply_snap(
         privacy=incoming_message.privacy,
     )
 
-    return await create_tweet(
+    return await create_snap(
         snap,
         incoming_message.user_id,
         hashtag_dao, mention_dao, snaps_dao)
