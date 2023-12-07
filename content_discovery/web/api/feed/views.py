@@ -51,7 +51,8 @@ async def create_snap(snap, user_id, hashtag_dao, mention_dao, snaps_dao, trend_
         )
 
     # trigger notification
-    await Notifications().notify_if_snap_is_about_trending_topic(snap, hashtags, trend_dao)
+    await Notifications().notify_if_snap_is_about_trending_topic(
+        snap, hashtags, snaps_dao, trend_dao)
 
     # return info
     completed_snaps = await complete_snaps([snap], user_id, snaps_dao)

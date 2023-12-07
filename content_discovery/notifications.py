@@ -13,14 +13,18 @@ class Notifications:
     """Send notifications."""
 
     async def notify_if_snap_is_about_trending_topic(
-        self, snap : SnapsModel, hashtags: List[str], topic_dao: TrendingTopicDAO):
+        self,
+        snap : SnapsModel,
+        hashtags: List[str],
+        snap_dao: SnapDAO,
+        topic_dao: TrendingTopicDAO):
         topics = await topic_dao.get_all_topics()
         topic_names = [topic.name for topic in topics]
         print(topic_names)
         for tag in hashtags:
             if tag in topic_names:
                 print("sending notif")
-                await self.send_notification_of_snap_in_trending(snap, tag)
+                await self.send_notification_of_snap_in_trending(tag, snap, snap_dao)
                 break
 
     async def send_mention_notification(
@@ -79,21 +83,21 @@ class Notifications:
 
         httpx.post(
             _url_post_trending_notification(),
-            params=params,
+            json=params,
             timeout=timeout,
         )
 
     async def send_notification_of_snap_in_trending(
         self,
-        snap: SnapsModel,
         topic: str,
+        snap: SnapsModel,
+        snap_dao: SnapDAO,
     ) -> None:
         """Send trending snap notification."""
         params = {
-            "snap_id": snap.id,
             "topic": topic,
+            "snap": await _format_snap(snap.id, snap_dao),
         }
-        print("sending")
         timeout = httpx.Timeout(10.0, read=10.0)
 
         httpx.post(
