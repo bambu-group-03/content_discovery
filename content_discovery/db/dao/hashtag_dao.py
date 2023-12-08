@@ -69,11 +69,14 @@ class HashtagDAO:
         minimum_hashtag_count: int,
     ) -> List[RowMapping]:
         """Get counts of the most common hashtags within a timeframe"""
-        query = select(HashtagModel.name, func.count(HashtagModel.name).label("count"))
+        query = select(
+            HashtagModel.name,
+            func.count(func.distinct(HashtagModel.snap_id)).label("count"),
+        )
         query = query.where(HashtagModel.created_at > cutoff_date)
         query = query.group_by(HashtagModel.name)
         query = query.having(
-            func.count(HashtagModel.name) >= minimum_hashtag_count,
+            func.count(func.distinct(HashtagModel.snap_id)) >= minimum_hashtag_count,
         )
         rows = await self.session.execute(query)
         return list(rows.mappings().fetchall())
