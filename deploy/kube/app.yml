@@ -21,7 +21,7 @@ spec:
         image: $OKTETO_BUILD_API_IMAGE
         imagePullPolicy: Always
         env:
-        - name: CONTENT_DISCOVERY_CONTENT_DISCOVERY_URL
+        - name: CONTENT_DISCOVERY_IDENTITY_SOCIALIZER_URL
           value: http://api.identity-socializer-luiscusihuaman:8000
         - name: CONTENT_DISCOVERY_DB_BASE
           value: content_discovery
