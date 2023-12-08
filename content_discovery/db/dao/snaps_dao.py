@@ -155,9 +155,10 @@ class SnapDAO:
         :param offset: offset of snaps.
         :return: stream of snaps.
         """
-        raw_snaps = await self.session.execute(
-            select(SnapsModel).limit(limit).offset(offset),
-        )
+        query = select(SnapsModel).limit(limit).offset(offset)
+        query = query.order_by(SnapsModel.created_at.desc())
+
+        raw_snaps = await self.session.execute(query)
 
         return list(raw_snaps.scalars().fetchall())
 
@@ -204,6 +205,7 @@ class SnapDAO:
         """Get snaps from user by admin"""
         query = select(SnapsModel)
         query = query.where(SnapsModel.user_id == user_id)
+        query = query.order_by(SnapsModel.created_at.desc())
         query = query.limit(limit).offset(offset)
         rows = await self.session.execute(query)
 
