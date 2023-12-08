@@ -66,6 +66,7 @@ filterwarnings = [
     "ignore::DeprecationWarning",
     "ignore:.*unclosed.*:ResourceWarning",
 ]
+[pytest]
 env = [
     "CONTENT_DISCOVERY_ENVIRONMENT=pytest",
     "CONTENT_DISCOVERY_DB_BASE=content_discovery_test",
