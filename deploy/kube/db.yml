@@ -1,74 +1,101 @@
 ---
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
-  namespace: content-discovery
-  name: content-discovery-db
+  name: db
+  namespace: content-discovery-luiscusihuaman
 spec:
+  replicas: 1
   selector:
     matchLabels:
-      app: content-discovery-db
+      stack.okteto.com/name: content-discovery
+      stack.okteto.com/service: db
+  serviceName: db
   template:
     metadata:
       labels:
-        app: content-discovery-db
+        stack.okteto.com/name: content-discovery
+        stack.okteto.com/service: db
     spec:
       containers:
-      - name: database
-        image: postgres:13.8-bullseye
-        resources:
-          limits:
-            memory: "300Mi"
-            cpu: "200m"
-        env:
-        - name: POSTGRES_PASSWORD
-          value: "content_discovery"
-        - name: POSTGRES_USER
-          value: "content_discovery"
-        - name: POSTGRES_DB
-          value: "content_discovery"
-        ports:
-        - containerPort: 5432
+        - env:
+            - name: POSTGRES_DB
+              value: content_discovery
+            - name: POSTGRES_PASSWORD
+              value: content_discovery
+            - name: POSTGRES_USER
+              value: content_discovery
+          image: postgres:13.8-bullseye
+          imagePullPolicy: IfNotPresent
+          name: db
+          readinessProbe:
+            exec:
+              command:
+                - pg_isready
+                - -U
+                - content_discovery
+            failureThreshold: 40
+            periodSeconds: 2
+            successThreshold: 1
+            timeoutSeconds: 3
+          volumeMounts:
+            - mountPath: /var/lib/postgresql/data
+              name: content-discovery-db-data
+              subPath: content-discovery-db-data
+      volumes:
+        - name: content-discovery-db-data
+          persistentVolumeClaim:
+            claimName: content-discovery-db-data
 ---
 apiVersion: v1
 kind: Service
 metadata:
-  namespace: content-discovery
-  name: "content-discovery-db-service"
+  namespace: content-discovery-luiscusihuaman
+  name: db
 spec:
   selector:
-    app: content-discovery-db
+    stack.okteto.com/name: content-discovery
+    stack.okteto.com/service: db
   ports:
-  - port: 5432
-    targetPort: 5432
+    - port: 5432
+      protocol: TCP
+      targetPort: 5432
 ---
 apiVersion: batch/v1
 kind: Job
 metadata:
-  namespace: content-discovery
-  name: content-discovery-migrator
+  labels:
+    stack.okteto.com/name: content-discovery
+    stack.okteto.com/service: migrator
+  name: migrator
+  namespace: content-discovery-luiscusihuaman
 spec:
   ttlSecondsAfterFinished: 100
+  suspend: false
   template:
+    metadata:
+      labels:
+        batch.kubernetes.io/job-name: migrator
+        job-name: migrator
     spec:
       containers:
-      - name: migrator
-        image: content_discovery:latest
-        command:
-        - "alembic"
-        - "upgrade"
-        - "head"
-        resources:
-          limits:
-            memory: "200Mi"
-            cpu: "250m"
-        env:
-        - name: "CONTENT_DISCOVERY_DB_HOST"
-          value: "content-discovery-db-service"
-      initContainers:
-      - name: wait-for-db
-        image: toschneck/wait-for-it:latest
-        command: ["./wait-for-it.sh", "-t", "60", "content-discovery-db-service:5432"]
+        - args:
+            - alembic
+            - upgrade
+            - head
+          env:
+            - name: CONTENT_DISCOVERY_DB_BASE
+              value: content_discovery
+            - name: CONTENT_DISCOVERY_DB_HOST
+              value: db
+            - name: CONTENT_DISCOVERY_DB_PASS
+              value: content_discovery
+            - name: CONTENT_DISCOVERY_DB_PORT
+              value: "5432"
+            - name: CONTENT_DISCOVERY_DB_USER
+              value: content_discovery
+          image: $OKTETO_BUILD_API_IMAGE
+          imagePullPolicy: IfNotPresent
+          name: migrator
       restartPolicy: Never
-
 ---
