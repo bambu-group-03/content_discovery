@@ -113,24 +113,29 @@ async def reply_snap(
         parent_id=incoming_message.parent_id,
         privacy=incoming_message.privacy,
     )
-    if snap:
+
+    if not snap:
+        return None
+
+    parent_snap = await snaps_dao.get_snap_from_id(incoming_message.parent_id)
+
+    if parent_snap:
         # Send notification for new reply
         await Notifications().send_reply_notification(
             from_id=incoming_message.user_id,
-            to_id=snap.user_id,
-            snap_id=str(snap.id),
+            to_id=parent_snap.user_id,
+            snap_id=str(parent_snap.id),
             snap_dao=snaps_dao,
         )
 
-        return await _create_snap(
-            snap,
-            incoming_message.user_id,
-            hashtag_dao,
-            mention_dao,
-            snaps_dao,
-            trend_dao,
-        )
-    return None
+    return await _create_snap(
+        snap,
+        incoming_message.user_id,
+        hashtag_dao,
+        mention_dao,
+        snaps_dao,
+        trend_dao,
+    )
 
 
 @router.put("/update_snap")
