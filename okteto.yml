@@ -7,13 +7,12 @@ build:
     context: .
     dockerfile: deploy/Dockerfile
 deploy:
-  compose:
-  - file: deploy/docker-compose.okteto.yml
-  endpoints:
-  - path: /
-    service: api
-    port: 9000
-  - path: /db
-    service: pgadmin
-    port: 5050
+  commands:
+    - echo $OKTETO_BUILD_API_IMAGE
+    - command -v envsubst &> /dev/null || (apk add -u gettext && ln -s /usr/bin/envsubst /usr/local/bin/envsubst)
+    - kubectl delete job migrator -n content-discovery-luiscusihuaman --ignore-not-found
+    - envsubst < deploy/kube/app.yml | kubectl apply -f -
+    - envsubst < deploy/kube/db.yml | kubectl apply -f -
+    - kubectl apply -f deploy/kube/pgadmin.yml
+
 namespace: content-discovery-luiscusihuaman
