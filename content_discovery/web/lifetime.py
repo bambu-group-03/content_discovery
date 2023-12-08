@@ -7,7 +7,7 @@ from prometheus_fastapi_instrumentator.instrumentation import (
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 from content_discovery.settings import settings
-from content_discovery.web.background_task import do_startup
+from content_discovery.web.background_task import background_task
 
 
 def _setup_db(app: FastAPI) -> None:  # pragma: no cover
@@ -59,7 +59,7 @@ def register_startup_event(
         _setup_db(app)
         setup_prometheus(app)
         app.middleware_stack = app.build_middleware_stack()
-        do_startup(app)
+        background_task.kick_off_background_tasks(app)
 
         pass  # noqa: WPS420
 

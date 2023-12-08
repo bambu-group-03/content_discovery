@@ -22,7 +22,7 @@ class BackgroundTask:
         self.deleting_delta = datetime.timedelta(hours=3)
         self.period_deleting_minutes = 5
 
-    async def my_task(self, an_app: Any) -> None:
+    async def monitor_new_trending_topics(self, an_app: Any) -> None:
         """Handle trending topics background process"""
         self.app = an_app
         self.session = an_app.state.db_session_factory()
@@ -59,6 +59,13 @@ class BackgroundTask:
             await trend_dao.delete_old_trending_topics(self.deleting_delta)
             await asyncio.sleep(60 * self.period_deleting_minutes)
 
+    def kick_off_background_tasks(self, an_app: Any) -> None:
+        """Kick off background tasks."""
+        print("Tasks Started")
+        asyncio.create_task(background_task.monitor_new_trending_topics(an_app))
+        asyncio.create_task(background_task.delete_old_trending_topic(an_app))
+        print("Tasks Created")
+
     async def _send_notification(self, new_tags: List[Any]) -> None:
         first_tag = max(new_tags, key=lambda tag: tag["count"])
         await Notifications().send_trending_notification(first_tag["name"])
@@ -72,12 +79,4 @@ class BackgroundTask:
         return new_tags
 
 
-bgtask = BackgroundTask()
-
-
-def do_startup(an_app: Any) -> None:
-    """Kick off background task (should be instance method)"""
-    print("Tasks Started")
-    asyncio.create_task(bgtask.my_task(an_app))
-    asyncio.create_task(bgtask.delete_old_trending_topic(an_app))
-    print("Tasks Created")
+background_task = BackgroundTask()
