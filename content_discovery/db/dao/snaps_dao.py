@@ -339,6 +339,7 @@ class SnapDAO:
         query = _query_visibility_is_public(query)
         query = _query_privacy_filter_to_only_followers(query, requester_is_following)
         query = query.filter(SnapsModel.content.ilike(f"%{content}%"))
+        query = query.order_by(SnapsModel.created_at.desc())
 
         rows = await self.session.execute(query)
 
@@ -351,6 +352,7 @@ class SnapDAO:
         """Get list of filtered snaps by content."""
         query = select(SnapsModel)
         query = query.filter(SnapsModel.content.ilike(f"%{content}%"))
+        query = query.order_by(SnapsModel.created_at.desc())
 
         rows = await self.session.execute(query)
 
