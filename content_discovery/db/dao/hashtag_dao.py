@@ -58,6 +58,7 @@ class HashtagDAO:
         query = query.where(SnapsModel.visibility == Visibility.PUBLIC.value)
         query = query.join(HashtagModel.snap)
         query = query.filter(HashtagModel.name.ilike(f"%{name}%"))
+        query = query.order_by(SnapsModel.created_at.desc())
 
         rows = await self.session.execute(query)
 
